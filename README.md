@@ -8,8 +8,8 @@
 ```
 
 - Подключение:
-  database: `soul_mate`
-  user: `postgres`
-  port: указан в `database/.env`
-  password: `1234`
+  - database: `soul_mate`
+  - user: `postgres`
+  - port: указан в `database/.env`
+  - password: `1234`
   
