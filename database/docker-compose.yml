@@ -24,6 +24,17 @@ services:
     depends_on:
       - db
 
+  test_data:
+    build: .
+    restart: on-failure:1
+    environment:
+      - DATABASE_URL=postgresql://postgres:1234@db/soul_mate
+    entrypoint: /bin/bash
+    command: -c "python data/add_test_data.py"
+    depends_on:
+      - migration
+      - db
+
 volumes:
   db_postgres:
     name: db_postgres
