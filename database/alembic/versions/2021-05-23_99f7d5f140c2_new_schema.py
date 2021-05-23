@@ -33,7 +33,8 @@ sql = f"""
         CREATE TABLE public.users (
             id                      uuid  PRIMARY KEY,
             login                   VARCHAR (50) NOT NULL UNIQUE,
-            password                VARCHAR (50) NOT NULL
+            password                VARCHAR (50) NOT NULL,
+            is_admin                boolean default false
         );
 
         
