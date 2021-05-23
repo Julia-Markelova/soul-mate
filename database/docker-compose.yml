@@ -5,7 +5,7 @@ services:
     image: postgres
     restart: always
     ports:
-      - 55434:5432
+      - $DB_PORT:5432
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=1234
