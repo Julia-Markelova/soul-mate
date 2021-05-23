@@ -26,7 +26,6 @@ services:
 
   test_data:
     build: .
-    restart: on-failure:1
     environment:
       - DATABASE_URL=postgresql://postgres:1234@db/soul_mate
     entrypoint: /bin/bash
