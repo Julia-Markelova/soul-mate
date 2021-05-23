@@ -3,7 +3,6 @@
 - Запуск и добавление таблиц:
 ```
    $ cd database
-   $ export `cat .env | xargs`  // там порт для бд указан
    $ docker-compose up
 ```
 
