@@ -1,10 +1,11 @@
 import datetime
+import os
 import random
+from urllib.parse import urlparse
 from uuid import uuid4
 
 import psycopg2 as psycopg2
 from psycopg2.extras import execute_values
-
 
 god_names = ['Зевс (Юпитер)',
              'Посейдон (Нептун)',
@@ -104,7 +105,7 @@ for soul in souls[:life_souls]:
         date_of_death = None
         is_dead = random.choice([True, False])
         if is_dead:
-            age = random.randint(11, born_years_ago)
+            age = random.randint(10, born_years_ago)
             date_of_death = date_of_birth + datetime.timedelta(days=365 * age)
 
         lifes.append({
@@ -116,7 +117,6 @@ for soul in souls[:life_souls]:
             'date_of_birth': date_of_birth,
             'date_of_death': date_of_death,
         })
-
 
 dead_souls = [soul for soul in lifes if soul['date_of_death'] is not None]
 alive_souls = [soul for soul in lifes if soul['date_of_death'] is None]
@@ -131,14 +131,12 @@ for i in range(len(alive_souls)):
             'relative_id': alive_souls[i]['id'],
         })
 
-
 for i in range(exercises_count):
     exercises.append({
         'id': str(uuid4()),
         'name': f'ex_{i}',
         'skill': f'skill_{i}'
     })
-
 
 for soul in souls:
     life = [life for life in lifes if life['soul_id'] == soul['id']]
@@ -170,7 +168,6 @@ for program in personal_programs:
                 'exercise_id': ex['id'],
             })
 
-
 for life in lifes:
     program = [program for program in personal_programs if program['soul_id'] == life['soul_id']]
     life_sparks.append({
@@ -180,7 +177,6 @@ for life in lifes:
         'issued_by': random.choice(mentors)['id'],
         'personal_program_id': program[0]['id']
     })
-
 
 for life_spark in life_sparks:
     life_tickets.append({
@@ -202,12 +198,13 @@ def insert(table_name: str, rec: list, cur):
 
 
 if __name__ == '__main__':
+    url = urlparse(os.getenv('DATABASE_URL'))
     conn = psycopg2.connect(
-        host="localhost",
-        database="soul_mate",
-        user="postgres",
-        password="1234",
-        port=55435)
+        host=url.hostname,
+        database=url.path[1:],
+        user=url.username,
+        password=url.password,
+        port=url.port)
 
     cur = conn.cursor()
 
