@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  db:
+    image: postgres
+    restart: always
+    ports:
+      - $DB_PORT:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1234
+      - POSTGRES_DB=soul_mate
+      - ALLOW_IP_RANGE=0.0.0.0/0
+    volumes:
+      - db_postgres:/var/lib/postgresql
+
+  migration:
+    build: .
+    restart: on-failure:1
+    environment:
+      - DATABASE_URL=postgresql://postgres:1234@db/soul_mate
+    entrypoint: /bin/bash
+    command: -c "while ! pg_isready -h db; do sleep 1s; done && alembic upgrade head && nc -lk 4040"
+    depends_on:
+      - db
+
+volumes:
+  db_postgres:
+    name: db_postgres
+
