@@ -10,6 +10,6 @@
 - Подключение:
   - database: `soul_mate`
   - user: `postgres`
-  - port: указан в `database/.env`
+  - port: `55435`
   - password: `1234`
   
