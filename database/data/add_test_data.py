@@ -198,7 +198,10 @@ def insert(table_name: str, rec: list, cur):
 
 
 if __name__ == '__main__':
-    url = urlparse(os.getenv('DATABASE_URL'))
+    db_url = os.getenv('DATABASE_URL')
+    if db_url is None:
+        raise ValueError('Установите переменную окружения `DATABASE_URL`')
+    url = urlparse(db_url)
     conn = psycopg2.connect(
         host=url.hostname,
         database=url.path[1:],
@@ -208,15 +211,21 @@ if __name__ == '__main__':
 
     cur = conn.cursor()
 
-    insert('users', users, cur)
-    insert('gods', gods, cur)
-    insert('souls', souls, cur)
-    insert('lifes', lifes, cur)
-    insert('soul_relatives', soul_relatives, cur)
-    insert('personal_programs', personal_programs, cur)
-    insert('exercises', exercises, cur)
-    insert('program_exercises', program_exercises, cur)
-    insert('life_sparks', life_sparks, cur)
-    insert('life_tickets', life_tickets, cur)
+    try:
+        insert('users', users, cur)
+        insert('gods', gods, cur)
+        insert('souls', souls, cur)
+        insert('lifes', lifes, cur)
+        insert('soul_relatives', soul_relatives, cur)
+        insert('personal_programs', personal_programs, cur)
+        insert('exercises', exercises, cur)
+        insert('program_exercises', program_exercises, cur)
+        insert('life_sparks', life_sparks, cur)
+        insert('life_tickets', life_tickets, cur)
 
-    conn.commit()
+        conn.commit()
+
+    except psycopg2.errors.UniqueViolation:
+        print('Данные в бд уже добавлены.')
+
+
