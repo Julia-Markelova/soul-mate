@@ -1,4 +1,4 @@
-package ifmo.soulmate.demo.models;
+package ifmo.soulmate.demo.entities;
 
 import javax.persistence.*;
 import java.util.Date;
