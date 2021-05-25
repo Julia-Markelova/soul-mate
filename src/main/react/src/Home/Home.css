@@ -1,0 +1,36 @@
+.Home {
+  text-align: center;
+}
+
+.Home-header {
+  color: #7B9CEA;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  background-color: white;
+}
+
+.Home-subtitle {
+  padding-top: 3%;
+}
+.Home-firstParagraph {
+  width: 50%;
+  padding-top: 3%;
+  text-align: left;
+}
+
+.Home-secondParagraph {
+  width: 50%;
+  padding-top: 3%;
+  text-align: right;
+}
+
+.Home-thirdParagraph {
+  width: 50%;
+  padding-top: 3%;
+  text-align: left;
+}
+

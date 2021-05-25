@@ -1,0 +1,36 @@
+.TicketContent {
+    background-color: #7b9cea52;
+    height: 300px;
+}
+
+.TicketContent-title {
+    text-align: center;
+    font-size: 30px;
+    font-style: italic;
+    font-weight: 600;
+    font-family: Open Sans;
+    letter-spacing: 0.12em;
+}
+
+.TicketContent-button {
+    background-color: #7B9CEA !important;
+    width: 200px;
+    color: white !important;
+    margin-top: 20px !important;
+    margin-left: 37% !important;
+}
+
+.TicketContent-info {
+    font-family: Open Sans;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 20px;
+    text-align: center;
+    margin-left: 50px;
+    margin-right: 50px;
+    height: 30px;
+}
+
+.TicketContent-redirectInfo {
+    text-align: center;
+}

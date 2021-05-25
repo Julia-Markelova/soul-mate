@@ -1,0 +1,13 @@
+.Ticket {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 90vh;
+    color: #7B9CEA;
+}
+
+.Ticket-spinner {
+    color: #7B9CEA !important;
+    position: relative;
+    left: 45%;
+}
