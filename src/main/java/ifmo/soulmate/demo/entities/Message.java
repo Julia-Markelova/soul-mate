@@ -19,6 +19,7 @@ public class Message {
     private String message;
 
     @Column(name = "status")
+    @Enumerated(EnumType.STRING)
     private MessageStatus status;
 
     public Message() {

@@ -51,7 +51,7 @@ public class SoulService {
                 mentor = "перестала быть наставником";
             }
             String msg_text = "Уважаемый(ая), " + relative.getSoulName() + " " + relative.getSoulSurname() +
-                    ", Ваша родственная душа " + mentor + " " + updatedSoul.getStatus().toString();
+                    ", Ваша родственная душа " + mentor + ".";
             Message message = new Message(
                     UUID.randomUUID(), relativeId, msg_text, MessageStatus.NEW
             );
