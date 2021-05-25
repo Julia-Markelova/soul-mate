@@ -7,9 +7,7 @@ import ifmo.soulmate.demo.repositories.SoulRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,4 +48,25 @@ public class SoulService {
                 .collect(Collectors.toList());
     }
 
+    public void updateSoulStatus(UUID soulId, SoulStatus status) {
+        Optional<Soul> soul = soulRepository.findById(soulId);
+        if (soul.isPresent()) {
+            Soul unwrapped = soul.get();
+            if (unwrapped.getStatus() != status) {
+                unwrapped.setStatus(status);
+                soulRepository.saveAndFlush(unwrapped);
+            }
+        }
+    }
+
+    public void updateSoulMentor(UUID soulId, Boolean isMentor) {
+        Optional<Soul> soul = soulRepository.findById(soulId);
+        if (soul.isPresent()) {
+            Soul unwrapped = soul.get();
+            if (unwrapped.getIs_mentor() != isMentor) {
+                unwrapped.setIs_mentor(isMentor);
+                soulRepository.saveAndFlush(unwrapped);
+            }
+        }
+    }
 }
