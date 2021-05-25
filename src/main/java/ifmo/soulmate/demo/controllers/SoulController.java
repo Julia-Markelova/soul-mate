@@ -1,6 +1,7 @@
 package ifmo.soulmate.demo.controllers;
 
 import ifmo.soulmate.demo.entities.LifeTicket;
+import ifmo.soulmate.demo.entities.SoulStatus;
 import ifmo.soulmate.demo.models.SoulDto;
 import ifmo.soulmate.demo.services.LifeTicketService;
 import ifmo.soulmate.demo.services.SoulService;
@@ -35,6 +36,19 @@ public class SoulController {
     @PutMapping("/souls/{soulId}/life-tickets/{ticketId}")
     public ResponseEntity receiveLifeTicket(@PathVariable String soulId, @PathVariable String ticketId) {
         lifeTicketService.receiveLifeTicket(UUID.fromString(soulId), UUID.fromString(ticketId));
+        return ResponseEntity.ok().build();
+    }
+
+//    todo: сделать нормальный пут-запрос с целой сущностью
+    @PutMapping("/souls/{soulId}/update/status/{status}")
+    public ResponseEntity updateSoulStatus(@PathVariable String soulId, @PathVariable String status) {
+        soulService.updateSoulStatus(UUID.fromString(soulId), SoulStatus.valueOf(status));
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/souls/{soulId}/update/mentor/{isMentor}")
+    public ResponseEntity updateSoulMentor(@PathVariable String soulId, @PathVariable Boolean isMentor) {
+        soulService.updateSoulMentor(UUID.fromString(soulId), isMentor);
         return ResponseEntity.ok().build();
     }
 }
