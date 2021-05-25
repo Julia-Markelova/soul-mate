@@ -11,4 +11,6 @@ public interface ISoulRelativeRepository extends JpaRepository<SoulRelative, UUI
     @Query(value = "select CAST(relative_id as varchar) relative_id from soul_relatives where soul_id = ?1 and notify_relative_about_soul = true ",
             nativeQuery = true)
     public List<UUID> getRelativesWithAllowedNotificationsForSoulId(UUID soulId);
+
+    public List<SoulRelative> getSoulRelativeByRelativeIdAndNotifyRelativeAboutSoul(UUID relativeId, boolean isNotify);
 }

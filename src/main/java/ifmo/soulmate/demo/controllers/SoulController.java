@@ -2,8 +2,10 @@ package ifmo.soulmate.demo.controllers;
 
 import ifmo.soulmate.demo.entities.LifeTicket;
 import ifmo.soulmate.demo.entities.SoulStatus;
+import ifmo.soulmate.demo.models.MessageDto;
 import ifmo.soulmate.demo.models.SoulDto;
 import ifmo.soulmate.demo.services.LifeTicketService;
+import ifmo.soulmate.demo.services.NotificationService;
 import ifmo.soulmate.demo.services.SoulService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +24,9 @@ public class SoulController {
 
     @Autowired
     LifeTicketService lifeTicketService;
+
+    @Autowired
+    NotificationService notificationService;
 
     @GetMapping("/souls")
     public ResponseEntity<List<SoulDto>> getAllSouls() {
@@ -50,5 +55,10 @@ public class SoulController {
     public ResponseEntity updateSoulMentor(@PathVariable String soulId, @PathVariable Boolean isMentor) {
         soulService.updateSoulMentor(UUID.fromString(soulId), isMentor);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/notifications/{relativeId}")
+    public ResponseEntity<List<MessageDto>> getNewMessages(@PathVariable String relativeId) {
+        return ResponseEntity.ok(notificationService.getNewMessagesForRelative(UUID.fromString(relativeId)));
     }
 }
