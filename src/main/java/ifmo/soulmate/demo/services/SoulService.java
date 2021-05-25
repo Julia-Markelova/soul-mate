@@ -1,8 +1,10 @@
 package ifmo.soulmate.demo.services;
 
-import ifmo.soulmate.demo.entities.Soul;
-import ifmo.soulmate.demo.entities.SoulStatus;
+import ifmo.soulmate.demo.entities.*;
 import ifmo.soulmate.demo.models.SoulDto;
+import ifmo.soulmate.demo.repositories.ILifesRepository;
+import ifmo.soulmate.demo.repositories.IMessageRepository;
+import ifmo.soulmate.demo.repositories.ISoulRelativeRepository;
 import ifmo.soulmate.demo.repositories.SoulRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,7 +16,48 @@ import java.util.stream.Collectors;
 public class SoulService {
     @Autowired
     SoulRepository soulRepository;
+    @Autowired
+    ILifesRepository iLifesRepository;
+    @Autowired
+    ISoulRelativeRepository isoulRelativeRepository;
+    @Autowired
+    IMessageRepository iMessageRepository;
+
     private final Random random = new Random();
+
+    private void notifyRelativesAboutSoulStatus(Soul updatedSoul) {
+        List<UUID> relativesForNotify =
+                isoulRelativeRepository.getRelativesWithAllowedNotificationsForSoulId(updatedSoul.getId());
+        for (UUID relativeId : relativesForNotify) {
+            Life relative = iLifesRepository.getById(relativeId);
+            String msg_text = "Уважаемый(ая), " + relative.getSoulName() + " " + relative.getSoulSurname() +
+                    ", Ваша родственная душа получила новый статус: " + updatedSoul.getStatus().toString();
+            Message message = new Message(
+                    UUID.randomUUID(), relativeId, msg_text, MessageStatus.NEW
+            );
+            iMessageRepository.saveAndFlush(message);
+        }
+    }
+
+    private void notifyRelativesAboutSoulMentor(Soul updatedSoul) {
+        List<UUID> relativesForNotify =
+                isoulRelativeRepository.getRelativesWithAllowedNotificationsForSoulId(updatedSoul.getId());
+        for (UUID relativeId : relativesForNotify) {
+            Life relative = iLifesRepository.getById(relativeId);
+            String mentor;
+            if (updatedSoul.getIs_mentor()) {
+                mentor = "стала наствником";
+            } else {
+                mentor = "перестала быть наставником";
+            }
+            String msg_text = "Уважаемый(ая), " + relative.getSoulName() + " " + relative.getSoulSurname() +
+                    ", Ваша родственная душа " + mentor + " " + updatedSoul.getStatus().toString();
+            Message message = new Message(
+                    UUID.randomUUID(), relativeId, msg_text, MessageStatus.NEW
+            );
+            iMessageRepository.saveAndFlush(message);
+        }
+    }
 
     private String getRandomStatus(SoulStatus status) throws Exception {
 
@@ -55,6 +98,7 @@ public class SoulService {
             if (unwrapped.getStatus() != status) {
                 unwrapped.setStatus(status);
                 soulRepository.saveAndFlush(unwrapped);
+                notifyRelativesAboutSoulStatus(unwrapped);
             }
         }
     }
@@ -66,6 +110,7 @@ public class SoulService {
             if (unwrapped.getIs_mentor() != isMentor) {
                 unwrapped.setIs_mentor(isMentor);
                 soulRepository.saveAndFlush(unwrapped);
+                notifyRelativesAboutSoulMentor(unwrapped);
             }
         }
     }
