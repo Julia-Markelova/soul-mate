@@ -129,6 +129,7 @@ for i in range(len(alive_souls)):
             'id': str(uuid4()),
             'soul_id': random.choice(dead_souls)['soul_id'],
             'relative_id': alive_souls[i]['id'],
+            'notify_relative_about_soul': True,
         })
 
 for i in range(exercises_count):
