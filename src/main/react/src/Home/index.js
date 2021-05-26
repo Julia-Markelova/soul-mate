@@ -1,11 +1,8 @@
 import './Home.css';
-import Menu from "../Menu";
-
 
 function Home() {
     return (
         <>
-            <Menu />
             <div className="Home">
                 <header className="Home-header">
                     <h1>Добро пожаловать в приложение Душа!</h1>

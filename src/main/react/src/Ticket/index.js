@@ -1,5 +1,4 @@
 import './Ticket.css';
-import Menu from "../Menu";
 import { useEffect, useState } from "react";
 import { CircularProgress } from "@material-ui/core";
 import TicketContent from "./TicketContent";
@@ -42,7 +41,6 @@ function Ticket() {
 
     return (
         <>
-            <Menu />
             <div className="Ticket">
                 {
                     !data && (

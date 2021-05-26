@@ -1,6 +1,5 @@
 import * as React from "react";
 import {useEffect, useState} from "react";
-import Menu from "../Menu";
 import Button from "@material-ui/core/Button";
 
 function Parents() {
@@ -61,8 +60,6 @@ function Parents() {
 
     return (
         <>
-            <Menu />
-
             <Button onClick={x => handleSubscribe(x.target.checked)}
                 style={{margin: 'auto',
                     display: 'block',

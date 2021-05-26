@@ -1,6 +1,5 @@
 import './SoulsList.css';
 import { soulColumns } from './constants';
-import Menu from '../Menu';
 import { DataGrid } from '@material-ui/data-grid';
 import {useEffect, useMemo, useState} from "react";
 import {Input} from "@material-ui/core";
@@ -36,7 +35,6 @@ function SoulsList() {
 
     return (
         <>
-            <Menu />
             <div className="SoulsList-content">
                 <h1>Список душ</h1>
 
