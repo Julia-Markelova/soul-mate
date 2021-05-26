@@ -43,7 +43,8 @@ public class LifeTicketService {
                 .stream()
                 .filter(t -> allSparks
                         .stream()
-                        .anyMatch(s -> s.getId().equals(t.getLife_spark_id()) && t.getReceiveDate() == null))
+                        .anyMatch(s -> s.getReceived_by().equals(soulId) &&
+                                s.getId().equals(t.getLife_spark_id()) && t.getReceiveDate() == null))
                 .findFirst();
         return ticket.orElse(null);
     }

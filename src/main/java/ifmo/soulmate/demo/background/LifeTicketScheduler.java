@@ -19,7 +19,7 @@ public class LifeTicketScheduler {
     @Autowired
     ILIfeTicketRepository lifeTicketRepository;
 
-    @Scheduled(cron = "*/10 * * * * *")
+    @Scheduled(cron = "*/30 * * * * *")
     private void schedule() {
         List<LifeSpark> filteredSparks = lifeTicketService.getSparksWithoutTickets();
 
