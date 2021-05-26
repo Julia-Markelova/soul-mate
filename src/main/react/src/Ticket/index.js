@@ -10,8 +10,6 @@ function Ticket() {
 
     const [data, setData] = useState();
 
-    const [isLoading, setIsLoading ] = useState(true);
-
     const [progress, setProgress] = useState(0);
 
     useEffect(() => {
@@ -47,7 +45,7 @@ function Ticket() {
             <Menu />
             <div className="Ticket">
                 {
-                    isLoading && !data && (
+                    !data && (
                         <div >
                             <div>
                                 <h1>Поиск билета в жизнь</h1>
@@ -57,7 +55,7 @@ function Ticket() {
 
                     )
                 }
-                {data && <TicketContent />}
+                {data && <TicketContent soulId={soulId} />}
             </div>
         </>
     );

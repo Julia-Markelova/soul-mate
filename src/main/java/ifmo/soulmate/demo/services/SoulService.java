@@ -30,7 +30,7 @@ public class SoulService {
                 isoulRelativeRepository.getRelativesWithAllowedNotificationsForSoulId(updatedSoul.getId());
         for (UUID relativeId : relativesForNotify) {
             Life relative = iLifesRepository.getById(relativeId);
-            String msg_text = "Уважаемый(ая), " + relative.getSoulName() + " " + relative.getSoulSurname() +
+            String msg_text = "Уважаемый(ая) " + relative.getSoulName() + " " + relative.getSoulSurname() +
                     ", Ваша родственная душа получила новый статус: " + updatedSoul.getStatus().toString();
             Message message = new Message(
                     UUID.randomUUID(), relativeId, msg_text, MessageStatus.NEW
@@ -50,7 +50,7 @@ public class SoulService {
             } else {
                 mentor = "перестала быть наставником";
             }
-            String msg_text = "Уважаемый(ая), " + relative.getSoulName() + " " + relative.getSoulSurname() +
+            String msg_text = "Уважаемый(ая) " + relative.getSoulName() + " " + relative.getSoulSurname() +
                     ", Ваша родственная душа " + mentor + ".";
             Message message = new Message(
                     UUID.randomUUID(), relativeId, msg_text, MessageStatus.NEW

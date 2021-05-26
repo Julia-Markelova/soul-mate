@@ -13,4 +13,6 @@ public interface ISoulRelativeRepository extends JpaRepository<SoulRelative, UUI
     public List<UUID> getRelativesWithAllowedNotificationsForSoulId(UUID soulId);
 
     public List<SoulRelative> getSoulRelativeByRelativeIdAndNotifyRelativeAboutSoul(UUID relativeId, boolean isNotify);
+
+    public List<SoulRelative> getSoulRelativeByRelativeId(UUID relativeId);
 }

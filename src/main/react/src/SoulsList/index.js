@@ -1,5 +1,4 @@
 import './SoulsList.css';
-import { soulRows } from './mock';
 import { soulColumns } from './constants';
 import Menu from '../Menu';
 import { DataGrid } from '@material-ui/data-grid';

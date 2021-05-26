@@ -1,18 +1,33 @@
 import * as React from "react";
 import {useEffect, useState} from "react";
 import Menu from "../Menu";
-import {CircularProgress} from "@material-ui/core";
-import TicketContent from "../Ticket/TicketContent";
 import Button from "@material-ui/core/Button";
 
 function Parents() {
     const userId = "b3b04914-0434-4f6e-8d86-d3021220a62a";
 
     const [data, setData] = useState([]);
+    const [isSubscribed, setIsSubscribed] = useState(false);
 
-    const [isLoading, setIsLoading ] = useState(true);
+    useEffect(() => {
+        let isCancelled = false;
 
-    const [progress, setProgress] = useState(0);
+        const loadSouls = async () => {
+            try {
+                const response = await fetch(`http://localhost:8080/api/relatives/${userId}/subscriptions-status`);
+                !isCancelled && response.json().then(x => setIsSubscribed(x));
+            }
+            catch (error) {
+                !isCancelled && console.log(error.toString());
+            }
+        };
+
+        loadSouls()
+
+        return () => {
+            isCancelled = true;
+        };
+    }, [isSubscribed]);
 
     useEffect(() => {
         let isCancelled = false;
@@ -30,18 +45,36 @@ function Parents() {
         };
 
         const timer2 = setInterval(async () => {
-            await loadSouls();
+            if (isSubscribed) await loadSouls();
         }, 2000);
 
         return () => {
             clearInterval(timer2);
             isCancelled = true;
         };
-    }, [data]);
+    }, [data, isSubscribed]);
+
+    const handleSubscribe = async (value) => {
+        await fetch(`http://localhost:8080/api/relatives/${userId}/subscriptions?enable=${!isSubscribed}`);
+        setIsSubscribed(value)
+    }
 
     return (
         <>
             <Menu />
+
+            <Button onClick={x => handleSubscribe(x.target.checked)}
+                style={{margin: 'auto',
+                    display: 'block',
+                    backgroundColor: '#7b9cea',
+                    color: 'white',
+                    width: '200px',
+                    height: '50px',
+                    fontSize: '20px',
+                    marginTop: '33px'}}>
+                {isSubscribed ? "Отписаться" : "Подписаться"}
+            </Button>
+
             <div className="Ticket">
                 {
                     !data.length && (

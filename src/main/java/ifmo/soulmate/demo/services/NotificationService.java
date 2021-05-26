@@ -53,17 +53,26 @@ public class NotificationService {
         return iSoulRelativeRepository.getSoulRelativeByRelativeIdAndNotifyRelativeAboutSoul(relativeId, true);
     }
 
-    public SoulRelative unsubscribe(UUID soulRelativeId) {
-        SoulRelative soulRelative = iSoulRelativeRepository.getById(soulRelativeId);
-        soulRelative.setNotifyRelativeAboutSoul(false);
-        iSoulRelativeRepository.saveAndFlush(soulRelative);
-        return soulRelative;
+    public void unsubscribe(UUID relativeId) {
+        List<SoulRelative> soulRelatives = iSoulRelativeRepository.getSoulRelativeByRelativeId(relativeId);
+        for (SoulRelative s: soulRelatives
+        ) {
+            s.setNotifyRelativeAboutSoul(false);
+            iSoulRelativeRepository.saveAndFlush(s);
+        }
     }
 
-    public SoulRelative subscribe(UUID soulRelativeId) {
-        SoulRelative soulRelative = iSoulRelativeRepository.getById(soulRelativeId);
-        soulRelative.setNotifyRelativeAboutSoul(true);
-        iSoulRelativeRepository.saveAndFlush(soulRelative);
-        return soulRelative;
+    public void subscribe(UUID relativeId) {
+        List<SoulRelative> soulRelatives = iSoulRelativeRepository.getSoulRelativeByRelativeId(relativeId);
+        for (SoulRelative s: soulRelatives
+             ) {
+            s.setNotifyRelativeAboutSoul(true);
+            iSoulRelativeRepository.saveAndFlush(s);
+        }
+    }
+
+    public boolean getSubscriptionStatus(UUID relativeId) {
+        List<SoulRelative> soulRelatives = iSoulRelativeRepository.getSoulRelativeByRelativeId(relativeId);
+        return soulRelatives.stream().allMatch(SoulRelative::getNotifyRelativeAboutSoul);
     }
 }
