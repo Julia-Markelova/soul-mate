@@ -6,7 +6,7 @@ import TicketContent from "./TicketContent";
 
 
 function Ticket() {
-    const soulId = "49e883d7-1f63-4cf8-9cdb-f62615dd71fc";
+    const soulId = "b1a08ac2-fc48-4ec7-99cc-24d3c0f8e4fc";
 
     const [data, setData] = useState();
 
@@ -20,7 +20,7 @@ function Ticket() {
         const loadSouls = async () => {
             try {
                 const response = await fetch(`http://localhost:8080/api/souls/${soulId}/life-tickets`);
-                !isCancelled && response.json().then(x => !!x && setData(x));
+                !isCancelled && response.json().then(x => !!x && setData(x)).catch(x => console.log(x));
             }
             catch (error) {
                 !isCancelled && console.log(error.toString());
