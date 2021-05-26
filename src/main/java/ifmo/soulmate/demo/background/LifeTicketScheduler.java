@@ -26,6 +26,10 @@ public class LifeTicketScheduler {
         for (LifeSpark spark: filteredSparks) {
             LifeTicket ticket = new LifeTicket(UUID.randomUUID(), null, spark.getId(), true);
             lifeTicketRepository.saveAndFlush(ticket);
+            System.out.println("Создан билет в жизнь для души " + spark.getReceived_by());
+        }
+        if (filteredSparks.isEmpty()) {
+            System.out.println("Не обнаруено душ, которым можно выдать билет в жизнь");
         }
     }
 }
