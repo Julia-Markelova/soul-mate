@@ -65,11 +65,15 @@ life_souls = 50
 exercises_count = 50
 
 for i in range(users_count):
+    if i < len(god_names):
+        role = 'GOD'
+    else:
+        role = 'SOUL'
     users.append({
         'id': str(uuid4()),
         'login': f'user_{i}',
         'password': '1234',
-        'is_admin': False
+        'role': role
     })
 
 for i in range(users_count):
@@ -93,7 +97,7 @@ users.append({
     'id': str(uuid4()),
     'login': f'admin',
     'password': '1234',
-    'is_admin': True,
+    'role': 'ADMIN',
 })
 
 for soul in souls[:life_souls]:
