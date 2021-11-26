@@ -191,6 +191,15 @@ for life_spark in life_sparks:
         'is_auto_issued': random.choice([True, False]),
     })
 
+system_modes = [
+    {
+        'id': str(uuid4()),
+        'admin_id': str(users[-1]['id']),
+        'is_manual_mode': False,
+        'type': type_,
+    } for type_ in ['LIFE_SPARK_MODE', 'LIFE_TICKET_MODE']
+]
+
 
 def insert(table_name: str, rec: list, cur):
     columns = rec[0].keys()
@@ -217,16 +226,17 @@ if __name__ == '__main__':
     cur = conn.cursor()
 
     try:
-        insert('users', users, cur)
-        insert('gods', gods, cur)
-        insert('souls', souls, cur)
-        insert('lifes', lifes, cur)
-        insert('soul_relatives', soul_relatives, cur)
-        insert('personal_programs', personal_programs, cur)
-        insert('exercises', exercises, cur)
-        insert('program_exercises', program_exercises, cur)
-        insert('life_sparks', life_sparks, cur)
-        insert('life_tickets', life_tickets, cur)
+        # insert('users', users, cur)
+        # insert('gods', gods, cur)
+        # insert('souls', souls, cur)
+        # insert('lifes', lifes, cur)
+        # insert('soul_relatives', soul_relatives, cur)
+        # insert('personal_programs', personal_programs, cur)
+        # insert('exercises', exercises, cur)
+        # insert('program_exercises', program_exercises, cur)
+        # insert('life_sparks', life_sparks, cur)
+        # insert('life_tickets', life_tickets, cur)
+        insert('system_modes', system_modes, cur)
 
         conn.commit()
 
