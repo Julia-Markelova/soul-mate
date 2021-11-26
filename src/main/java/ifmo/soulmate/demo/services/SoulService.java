@@ -1,6 +1,8 @@
 package ifmo.soulmate.demo.services;
 
 import ifmo.soulmate.demo.entities.*;
+import ifmo.soulmate.demo.entities.enums.MessageStatus;
+import ifmo.soulmate.demo.entities.enums.SoulStatus;
 import ifmo.soulmate.demo.models.SoulDto;
 import ifmo.soulmate.demo.repositories.ILifesRepository;
 import ifmo.soulmate.demo.repositories.IMessageRepository;

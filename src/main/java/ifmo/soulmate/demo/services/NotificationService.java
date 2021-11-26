@@ -1,10 +1,9 @@
 package ifmo.soulmate.demo.services;
 
 import ifmo.soulmate.demo.entities.Message;
-import ifmo.soulmate.demo.entities.MessageStatus;
+import ifmo.soulmate.demo.entities.enums.MessageStatus;
 import ifmo.soulmate.demo.entities.SoulRelative;
 import ifmo.soulmate.demo.models.MessageDto;
-import ifmo.soulmate.demo.models.SoulDto;
 import ifmo.soulmate.demo.repositories.IMessageRepository;
 import ifmo.soulmate.demo.repositories.ISoulRelativeRepository;
 import org.springframework.beans.factory.annotation.Autowired;

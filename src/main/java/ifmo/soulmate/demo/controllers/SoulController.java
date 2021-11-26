@@ -1,7 +1,7 @@
 package ifmo.soulmate.demo.controllers;
 
 import ifmo.soulmate.demo.entities.LifeTicket;
-import ifmo.soulmate.demo.entities.SoulStatus;
+import ifmo.soulmate.demo.entities.enums.SoulStatus;
 import ifmo.soulmate.demo.models.MessageDto;
 import ifmo.soulmate.demo.models.SoulDto;
 import ifmo.soulmate.demo.services.LifeTicketService;

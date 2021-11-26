@@ -1,6 +1,6 @@
 package ifmo.soulmate.demo.models;
 
-import ifmo.soulmate.demo.entities.SoulStatus;
+import ifmo.soulmate.demo.entities.enums.SoulStatus;
 
 public class SoulDto {
     private String id;

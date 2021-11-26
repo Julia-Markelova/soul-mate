@@ -1,6 +1,6 @@
 package ifmo.soulmate.demo.models;
 
-import ifmo.soulmate.demo.entities.UserRole;
+import ifmo.soulmate.demo.entities.enums.UserRole;
 
 public class UserDto {
     private String id;

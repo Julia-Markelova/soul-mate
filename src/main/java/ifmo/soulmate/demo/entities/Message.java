@@ -1,5 +1,7 @@
 package ifmo.soulmate.demo.entities;
 
+import ifmo.soulmate.demo.entities.enums.MessageStatus;
+
 import javax.persistence.*;
 import java.util.UUID;
 
