@@ -19,7 +19,7 @@ public class LoginController {
     @Autowired
     private LoginService loginService;
 
-    private String attribute = "userId";
+    private final String attribute = "userId";
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public ResponseEntity login(Model model, HttpSession session, @RequestParam String login, @RequestParam String password ) {
