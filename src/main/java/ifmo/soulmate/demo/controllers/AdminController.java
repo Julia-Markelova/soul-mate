@@ -5,9 +5,9 @@ import ifmo.soulmate.demo.exceptions.AuthException;
 import ifmo.soulmate.demo.models.SystemModeDto;
 import ifmo.soulmate.demo.services.AdminService;
 import ifmo.soulmate.demo.services.LoginService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
@@ -27,7 +27,10 @@ public class AdminController {
     private LoginService loginService;
 
     @RequestMapping(value = "/getAllModes", method = RequestMethod.GET)
-    public ResponseEntity<List<SystemModeDto>> getAllModes(Model model, HttpSession session) {
+    @ApiOperation(value = "Получить информацию о режимах в системе",
+            notes = "Для запроса нужно быть авторизованным админом",
+            response = ResponseEntity.class)
+    public ResponseEntity<List<SystemModeDto>> getAllModes(HttpSession session) {
         try {
             loginService.authoriseAndCheckPermission(session, Collections.singletonList(UserRole.ADMIN));
         } catch (AuthException ex) {
@@ -37,7 +40,9 @@ public class AdminController {
     }
 
     @RequestMapping(value = "/changeMode", method = RequestMethod.GET)
-    public ResponseEntity changeMode(Model model, HttpSession session,
+    @ApiOperation(value = "Изменить режим системы: поставить ручной или автоматический",
+            notes = "Для запроса нужно быть авторизованным админом.")
+    public ResponseEntity<String> changeMode(HttpSession session,
                                      @RequestParam UUID modeId, @RequestParam boolean isManualMode) {
         try {
             loginService.authoriseAndCheckPermission(session, Collections.singletonList(UserRole.ADMIN));
