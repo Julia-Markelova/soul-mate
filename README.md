@@ -27,3 +27,7 @@
 - для получения и работы с данными использовать слой репозиториев ifmo.soulmate.demo.entities.repositories
 - контроллеры создавать в пакете ifmo.soulmate.demo.entities.controllers
 - конфиг для работы JPA c БД находится в C:\study\mpi\soul-mate\src\main\resources\application.properties
+
+
+# Полезные ссылки
+- swagger: *http://localhost:8080/swagger-ui.html*  // ну или ваш порт с приложенькой
