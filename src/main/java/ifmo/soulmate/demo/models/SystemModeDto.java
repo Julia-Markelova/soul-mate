@@ -33,11 +33,11 @@ public class SystemModeDto {
         this.type = type;
     }
 
-    public Boolean getManualMode() {
+    public Boolean getIsManualMode() {
         return isManualMode;
     }
 
-    public void setManualMode(Boolean manualMode) {
-        isManualMode = manualMode;
+    public void setIsManualMode(Boolean isManualMode) {
+        this.isManualMode = isManualMode;
     }
 }

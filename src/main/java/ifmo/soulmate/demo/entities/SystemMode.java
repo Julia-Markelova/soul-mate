@@ -49,11 +49,11 @@ public class SystemMode {
         this.adminId = adminId;
     }
 
-    public Boolean getManualMode() {
+    public Boolean getIsManualMode() {
         return isManualMode;
     }
 
-    public void setManualMode(Boolean manualMode) {
+    public void setIsManualMode(Boolean manualMode) {
         isManualMode = manualMode;
     }
 

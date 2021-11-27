@@ -3,7 +3,7 @@ package ifmo.soulmate.demo.services;
 import ifmo.soulmate.demo.controllers.LoginController;
 import ifmo.soulmate.demo.entities.SystemMode;
 import ifmo.soulmate.demo.models.SystemModeDto;
-import ifmo.soulmate.demo.repositories.AdminRepository;
+import ifmo.soulmate.demo.repositories.SystemModeRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,17 +18,17 @@ import java.util.stream.Collectors;
 @Service
 public class AdminService {
     @Autowired
-    private AdminRepository adminRepository;
+    private SystemModeRepository systemModeRepository;
     private static final Logger log = LogManager.getLogger(LoginController.class);
 
     public List<SystemModeDto> getAllModes() {
         log.info("Get all modes");
-        List<SystemMode> modes = adminRepository.findAll();
+        List<SystemMode> modes = systemModeRepository.findAll();
         return modes
                 .stream()
                 .map(x -> {
                     try {
-                        return new SystemModeDto(x.getId().toString(), x.getType(), x.getManualMode());
+                        return new SystemModeDto(x.getId().toString(), x.getType(), x.getIsManualMode());
                     } catch (Exception e) {
                         log.warn("Error in getting all modes: {}", e.toString());
                         e.printStackTrace();
@@ -40,13 +40,12 @@ public class AdminService {
     }
 
     public void updateMode(UUID modeId, Boolean isManualMode) {
-        Optional<SystemMode> mode = adminRepository.findById(modeId);
+        Optional<SystemMode> mode = systemModeRepository.findById(modeId);
         if (mode.isPresent()) {
             SystemMode unwrapped = mode.get();
-            if (unwrapped.getManualMode() != isManualMode) {
-//                todo: остановить/запустить автоматический режим чего-либо
-                unwrapped.setManualMode(isManualMode);
-                adminRepository.saveAndFlush(unwrapped);
+            if (unwrapped.getIsManualMode() != isManualMode) {
+                unwrapped.setIsManualMode(isManualMode);
+                systemModeRepository.saveAndFlush(unwrapped);
             }
         }
     }
