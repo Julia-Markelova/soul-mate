@@ -1,13 +1,19 @@
 package ifmo.soulmate.demo.services;
 
-import ifmo.soulmate.demo.entities.*;
+import ifmo.soulmate.demo.controllers.LoginController;
+import ifmo.soulmate.demo.entities.HelpRequest;
+import ifmo.soulmate.demo.entities.Life;
+import ifmo.soulmate.demo.entities.Message;
+import ifmo.soulmate.demo.entities.Soul;
+import ifmo.soulmate.demo.entities.enums.HelpRequestStatus;
 import ifmo.soulmate.demo.entities.enums.MessageStatus;
 import ifmo.soulmate.demo.entities.enums.SoulStatus;
+import ifmo.soulmate.demo.exceptions.NonExistingEntityException;
+import ifmo.soulmate.demo.models.HelpRequestDto;
 import ifmo.soulmate.demo.models.SoulDto;
-import ifmo.soulmate.demo.repositories.ILifesRepository;
-import ifmo.soulmate.demo.repositories.IMessageRepository;
-import ifmo.soulmate.demo.repositories.ISoulRelativeRepository;
-import ifmo.soulmate.demo.repositories.SoulRepository;
+import ifmo.soulmate.demo.repositories.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +30,10 @@ public class SoulService {
     ISoulRelativeRepository isoulRelativeRepository;
     @Autowired
     IMessageRepository iMessageRepository;
+    @Autowired
+    HelpRequestRepository helpRequestRepository;
+
+    private static final Logger log = LogManager.getLogger(LoginController.class);
 
     private final Random random = new Random();
 
@@ -115,5 +125,52 @@ public class SoulService {
                 notifyRelativesAboutSoulMentor(unwrapped);
             }
         }
+    }
+
+    public HelpRequestDto createNewHelpRequest(UUID soulId) throws NonExistingEntityException {
+        Optional<Soul> soul = soulRepository.findById(soulId);
+        if (soul.isPresent()) {
+            Soul unwrapped = soul.get();
+            if (unwrapped.getStatus() == SoulStatus.LOST) {
+                HelpRequest helpRequest = new HelpRequest(UUID.randomUUID(), HelpRequestStatus.NEW, soulId);
+                helpRequestRepository.saveAndFlush(helpRequest);
+                return new HelpRequestDto(helpRequest.getId().toString(), helpRequest.getCreatedBy().toString(), helpRequest.getStatus());
+            } else {
+                String msg = (String.format("Soul %s is not LOST", soulId.toString()));
+                log.warn(msg);
+                throw new IllegalArgumentException(msg);
+            }
+        } else {
+            String msg = (String.format("No soul found with id: %s", soulId.toString()));
+            log.warn(msg);
+            throw new NonExistingEntityException(msg);
+        }
+    }
+
+    public List<HelpRequestDto> getHelpRequestsBySoulId(UUID soulId) {
+        List<HelpRequest> requests = helpRequestRepository.getByCreatedBy(soulId);
+        log.info("Get all requests for soul {}", soulId);
+        return requests
+                .stream()
+                .map(x -> {
+                    if (x.getAcceptedBy() == null) {
+                        try {
+                            return new HelpRequestDto(x.getId().toString(), x.getCreatedBy().toString(), x.getStatus());
+                        } catch (Exception e) {
+                            log.warn(e.getMessage());
+                            e.printStackTrace();
+                        }
+                    }
+                    try {
+                        return new HelpRequestDto(x.getId().toString(), x.getCreatedBy().toString(), x.getAcceptedBy().toString(), x.getStatus());
+                    } catch (Exception e) {
+                        log.warn(e.getMessage());
+                        e.printStackTrace();
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
     }
 }
