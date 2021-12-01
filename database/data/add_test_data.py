@@ -67,11 +67,13 @@ exercises_count = 50
 for i in range(users_count):
     if i < len(god_names):
         role = 'GOD'
+        login = f'god_{i}'
     else:
         role = 'SOUL'
+        login = f'soul_{i}'
     users.append({
         'id': str(uuid4()),
-        'login': f'user_{i}',
+        'login': login,
         'password': '1234',
         'role': role
     })
