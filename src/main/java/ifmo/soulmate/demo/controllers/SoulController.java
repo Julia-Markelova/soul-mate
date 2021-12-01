@@ -42,11 +42,6 @@ public class SoulController {
     @Autowired
     LoginService loginService;
 
-    @GetMapping("/souls")
-    public ResponseEntity<List<SoulDto>> getAllSouls() {
-        return ResponseEntity.ok(soulService.getSouls());
-    }
-
     @GetMapping("/souls/{id}/life-tickets")
     public ResponseEntity<LifeTicket> getLifeTicket(@PathVariable String id) {
         return ResponseEntity.ok(lifeTicketService.getNotUsedLifeTicket(UUID.fromString(id)));

@@ -2,9 +2,11 @@ package ifmo.soulmate.demo.controllers;
 
 import ifmo.soulmate.demo.entities.enums.UserRole;
 import ifmo.soulmate.demo.exceptions.AuthException;
+import ifmo.soulmate.demo.models.SoulDto;
 import ifmo.soulmate.demo.models.SystemModeDto;
 import ifmo.soulmate.demo.services.AdminService;
 import ifmo.soulmate.demo.services.LoginService;
+import ifmo.soulmate.demo.services.SoulService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +27,22 @@ public class AdminController {
 
     @Autowired
     private LoginService loginService;
+
+    @Autowired
+    SoulService soulService;
+
+    @GetMapping("/souls")
+    @ApiOperation(value = "Получить список душ",
+            notes = "Для запроса нужно быть авторизованным админом",
+            response = ResponseEntity.class)
+    public ResponseEntity<List<SoulDto>> getAllSouls(HttpSession session) {
+        try {
+            loginService.authoriseAndCheckPermission(session, Collections.singletonList(UserRole.ADMIN));
+        } catch (AuthException ex) {
+            return new ResponseEntity(ex.getMessage(), ex.getStatus());
+        }
+        return ResponseEntity.ok(soulService.getSouls());
+    }
 
     @RequestMapping(value = "/getAllModes", method = RequestMethod.GET)
     @ApiOperation(value = "Получить информацию о режимах в системе",
