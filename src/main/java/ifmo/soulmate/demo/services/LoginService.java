@@ -55,9 +55,24 @@ public class LoginService {
         return false;
     }
 
-    public String getUserIdFromToken(String token) {
-        Claims claims = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
-        return claims.getSubject();
+    public String getUserIdFromToken(String token) throws AuthException {
+        String msg;
+        try {
+            Claims claims = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
+            return claims.getSubject();
+        } catch (ExpiredJwtException expEx) {
+            msg = "Token expired";
+        } catch (UnsupportedJwtException unsEx) {
+            msg = "Unsupported jwt";
+        } catch (MalformedJwtException mjEx) {
+            msg = "Malformed jwt";
+        } catch (SignatureException sEx) {
+            msg = "Invalid signature";
+        } catch (Exception e) {
+            msg = "invalid token";
+        }
+        log.warn(msg);
+        throw new AuthException(msg, HttpStatus.UNAUTHORIZED);
     }
 
     public UserDto loginUser(String login, String password) throws AuthException {
