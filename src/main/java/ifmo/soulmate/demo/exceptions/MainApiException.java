@@ -1,14 +1,21 @@
 package ifmo.soulmate.demo.exceptions;
 
-
 import org.springframework.http.HttpStatus;
 
-public class AuthException extends MainApiException {
+public class MainApiException extends Exception {
     String message;
     HttpStatus status;
 
-    public AuthException(String message, HttpStatus status) {
-        super(message, status);
+    public MainApiException(String msg) {
+        super(msg);
+    }
+
+    public MainApiException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
+
+    public MainApiException(String message, HttpStatus status) {
+        super(message);
         this.message = message;
         this.status = status;
     }
