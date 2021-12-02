@@ -33,7 +33,7 @@ public class AdminController {
     @ApiOperation(value = "Получить список душ",
             notes = "Для запроса нужно быть авторизованным админом",
             response = ResponseEntity.class)
-    public ResponseEntity<List<SoulDto>> getAllSouls(@RequestHeader String token) {
+    public ResponseEntity<List<SoulDto>> getAllSouls(@RequestHeader("soul-token") String token) {
         try {
             loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.ADMIN));
         } catch (AuthException ex) {
@@ -46,7 +46,7 @@ public class AdminController {
     @ApiOperation(value = "Получить информацию о режимах в системе",
             notes = "Для запроса нужно быть авторизованным админом",
             response = ResponseEntity.class)
-    public ResponseEntity<List<SystemModeDto>> getAllModes(@RequestHeader String token) {
+    public ResponseEntity<List<SystemModeDto>> getAllModes(@RequestHeader("soul-token") String token) {
         try {
             loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.ADMIN));
         } catch (AuthException ex) {
@@ -55,11 +55,11 @@ public class AdminController {
         return ResponseEntity.ok(adminService.getAllModes());
     }
 
-    @RequestMapping(value = "/changeMode", method = RequestMethod.GET)
+    @RequestMapping(value = "/changeMode/{modeId}", method = RequestMethod.GET)
     @ApiOperation(value = "Изменить режим системы: поставить ручной или автоматический",
             notes = "Для запроса нужно быть авторизованным админом.")
-    public ResponseEntity<String> changeMode(@RequestHeader String token,
-                                             @RequestParam UUID modeId, @RequestParam boolean isManualMode) {
+    public ResponseEntity<String> changeMode(@RequestHeader("soul-token") String token,
+                                             @PathVariable UUID modeId, @RequestParam boolean isManualMode) {
         try {
             loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.ADMIN));
         } catch (AuthException ex) {
