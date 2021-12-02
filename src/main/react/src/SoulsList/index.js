@@ -3,17 +3,33 @@ import { soulColumns } from './constants';
 import { DataGrid } from '@material-ui/data-grid';
 import {useEffect, useMemo, useState} from "react";
 import {Input} from "@material-ui/core";
+import { useHistory } from 'react-router';
+import * as React from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 function SoulsList() {
+    const dispatch = useDispatch();
+
+    const history = useHistory();
+
+    const role = useSelector(s => s.user.role);
+    const token = useSelector(s => s.user.token);
+
+    useEffect(() => {
+        if (role !== "ADMIN" || !token) {
+            history.push('/')
+        }
+    }, [role, history]);
 
     const [souls, setSouls] = useState([]);
     const [filterValue, setFilterValue] = useState("");
+
     useEffect(() => {
         let isCancelled = false;
 
         const loadSouls = async () => {
             try {
-                const data = await fetch("http://localhost:8080/api/souls/");
+                const data = await fetch("http://localhost:8080/admin/souls/", { headers: { 'soul-token': token }});
                 !isCancelled && data.json().then(x => setSouls(x));
             }
             catch (error) {
@@ -26,7 +42,7 @@ function SoulsList() {
         return () => {
             isCancelled = true;
         }
-    }, []);
+    }, [token]);
 
     const filteredSouls = useMemo(() => {
         const filter = filterValue.toLowerCase();
