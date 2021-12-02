@@ -3,7 +3,6 @@ package ifmo.soulmate.demo.controllers;
 import ifmo.soulmate.demo.entities.enums.HelpRequestStatus;
 import ifmo.soulmate.demo.entities.enums.SoulStatus;
 import ifmo.soulmate.demo.entities.enums.UserRole;
-import ifmo.soulmate.demo.exceptions.AuthException;
 import ifmo.soulmate.demo.exceptions.MainApiException;
 import ifmo.soulmate.demo.exceptions.NonExistingEntityException;
 import ifmo.soulmate.demo.models.GodDto;
@@ -55,18 +54,18 @@ public class GodController {
         }
     }
 
-    @GetMapping("/gods/new-requests")
-    @ApiOperation(value = "Получить список новых запросов на выход из астрала",
+    @GetMapping("/gods/open-requests")
+    @ApiOperation(value = "Получить список открытых запросов на выход из астрала",
             notes = "Для запроса нужно быть авторизованным админом/богом",
             response = ResponseEntity.class)
-    public ResponseEntity<List<HelpRequestDto>> getNewRequests(@RequestHeader("soul-token") String token) {
+    public ResponseEntity<List<HelpRequestDto>> getOpenRequests(@RequestHeader("soul-token") String token) {
         UserDto userDto;
         try {
             userDto = loginService.authoriseAndCheckPermission(token, Arrays.asList(UserRole.ADMIN, UserRole.GOD));
         } catch (MainApiException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }
-        return ResponseEntity.ok(godService.getNewHelpRequests(UUID.fromString(userDto.getRoleId())));
+        return ResponseEntity.ok(godService.getOpenHelpRequests(UUID.fromString(userDto.getRoleId())));
     }
 
     @PutMapping("/gods/accept-request/{requestId}")

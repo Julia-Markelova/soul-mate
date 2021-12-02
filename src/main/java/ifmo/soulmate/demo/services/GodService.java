@@ -20,6 +20,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class GodService {
@@ -55,22 +56,13 @@ public class GodService {
         return new GodDto(unwrapped.getId().toString(), unwrapped.getUserId().toString(), unwrapped.getName());
     }
 
-    public List<HelpRequestDto> getNewHelpRequests(UUID godId) {
+    public List<HelpRequestDto> getOpenHelpRequests(UUID godId) {
         List<HelpRequest> newRequests = helpRequestRepository.getByStatus(HelpRequestStatus.NEW);
-        log.info("Get new requests by god {}", godId);
-        return newRequests
-                .stream()
-                .map(x -> {
-                    try {
-                        return new HelpRequestDto(x.getId().toString(), x.getCreatedBy().toString(), x.getStatus());
-                    } catch (Exception e) {
-                        log.warn(e.getMessage());
-                        e.printStackTrace();
-                    }
-                    return null;
-                })
-                .filter(Objects::nonNull)
+        List<HelpRequest> acceptedRequests = helpRequestRepository.getByAcceptedByAndStatus(godId, HelpRequestStatus.ACCEPTED);
+        List<HelpRequest> openRequests = Stream.concat(newRequests.stream(), acceptedRequests.stream())
                 .collect(Collectors.toList());
+        log.info("Get open requests by god {}", godId);
+        return mapResult(openRequests);
     }
 
     public List<HelpRequestDto> getHelpRequestsByGodId(UUID godId) {
@@ -103,8 +95,7 @@ public class GodService {
             req.setAcceptedBy(godId);
             helpRequestRepository.saveAndFlush(req);
             return new HelpRequestDto(req.getId().toString(), req.getCreatedBy().toString(), req.getAcceptedBy().toString(), req.getStatus());
-        }
-        else {
+        } else {
             throw new IllegalArgumentException("Can not update such request with such status");
         }
     }
@@ -114,7 +105,11 @@ public class GodService {
                 .stream()
                 .map(x -> {
                     try {
-                        return new HelpRequestDto(x.getId().toString(), x.getCreatedBy().toString(), x.getAcceptedBy().toString(), x.getStatus());
+                        return new HelpRequestDto(
+                                x.getId().toString(), x
+                                .getCreatedBy().toString(),
+                                (x.getAcceptedBy() != null) ? x.getAcceptedBy().toString() : null,
+                                x.getStatus());
                     } catch (Exception e) {
                         log.warn(e.getMessage());
                         e.printStackTrace();
