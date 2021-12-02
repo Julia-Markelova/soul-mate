@@ -6,6 +6,7 @@ import ifmo.soulmate.demo.exceptions.AuthException;
 import ifmo.soulmate.demo.exceptions.NonExistingEntityException;
 import ifmo.soulmate.demo.models.GodDto;
 import ifmo.soulmate.demo.models.HelpRequestDto;
+import ifmo.soulmate.demo.models.UserDto;
 import ifmo.soulmate.demo.services.GodService;
 import ifmo.soulmate.demo.services.LoginService;
 import io.swagger.annotations.ApiOperation;
@@ -19,7 +20,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-@SessionAttributes({"userId"})
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/api")
@@ -31,66 +31,60 @@ public class GodController {
     @Autowired
     LoginService loginService;
 
-    @GetMapping("/gods/{godId}")
+    @GetMapping("/gods/profile")
     @ApiOperation(value = "Получить информацию о боге",
             notes = "Для запроса нужно быть авторизованным админом/богом",
             response = ResponseEntity.class)
-    public ResponseEntity<GodDto> getGodById(@RequestHeader String token, @PathVariable String godId) {
+    public ResponseEntity<GodDto> getGodById(@RequestHeader("soul-token") String token) {
+        UserDto userDto;
         try {
-            loginService.authoriseAndCheckPermission(token, Arrays.asList(UserRole.ADMIN, UserRole.GOD));
+            userDto = loginService.authoriseAndCheckPermission(token, Arrays.asList(UserRole.ADMIN, UserRole.GOD));
         } catch (AuthException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }
         try {
-            return ResponseEntity.ok(godService.getGodById(UUID.fromString(godId)));
+            return ResponseEntity.ok(godService.getGodByUserId(UUID.fromString(userDto.getId())));
         } catch (NonExistingEntityException e) {
             return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
 
-    @GetMapping("/gods/get-by-userId/{userId}")
-    @ApiOperation(value = "Получить информацию о боге по юзер-ид",
-            notes = "Для запроса нужно быть авторизованным админом/богом",
-            response = ResponseEntity.class)
-    public ResponseEntity<GodDto> getGodByUserId(@RequestHeader String token, @PathVariable String userId) {
-        try {
-            loginService.authoriseAndCheckPermission(token, Arrays.asList(UserRole.ADMIN, UserRole.GOD));
-        } catch (AuthException ex) {
-            return new ResponseEntity(ex.getMessage(), ex.getStatus());
-        }
-        try {
-            return ResponseEntity.ok(godService.getGodByUserId(UUID.fromString(userId)));
-        } catch (NonExistingEntityException e) {
-            return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
-        }
-    }
-
-    @GetMapping("/gods/{godId}/new-requests")
+    @GetMapping("/gods/new-requests")
     @ApiOperation(value = "Получить список новых запросов на выход из астрала",
             notes = "Для запроса нужно быть авторизованным админом/богом",
             response = ResponseEntity.class)
-    public ResponseEntity<List<HelpRequestDto>> getNewRequests(@RequestHeader String token, @PathVariable String godId) {
+    public ResponseEntity<List<HelpRequestDto>> getNewRequests(@RequestHeader("soul-token") String token) {
+        UserDto userDto;
         try {
-            loginService.authoriseAndCheckPermission(token, Arrays.asList(UserRole.ADMIN, UserRole.GOD));
+            userDto = loginService.authoriseAndCheckPermission(token, Arrays.asList(UserRole.ADMIN, UserRole.GOD));
         } catch (AuthException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }
-        return ResponseEntity.ok(godService.getNewHelpRequests(UUID.fromString(godId)));
+        GodDto godDto;
+        try {
+            godDto = godService.getGodByUserId((UUID.fromString(userDto.getId())));
+        } catch (NonExistingEntityException e) {
+            return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(godService.getNewHelpRequests(UUID.fromString(godDto.getId())));
     }
 
-    @PutMapping("/gods/{godId}/accept-request/{requestId}")
+    @PutMapping("/gods/accept-request/{requestId}")
     @ApiOperation(value = "Принять запрос о помощи",
             notes = "Для запроса нужно быть авторизованным богом",
             response = ResponseEntity.class)
-    public ResponseEntity<HelpRequestDto> acceptRequest(@RequestHeader String token, @PathVariable String godId, @PathVariable String requestId) {
+    public ResponseEntity<HelpRequestDto> acceptRequest(@RequestHeader("soul-token") String token, @PathVariable String requestId) {
         HelpRequestDto helpRequestDto;
+        UserDto userDto;
+        GodDto godDto;
         try {
-            loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.GOD));
+            userDto =loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.GOD));
         } catch (AuthException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }
         try {
-            helpRequestDto = godService.updateStatusForRequest(UUID.fromString(godId), UUID.fromString(requestId), HelpRequestStatus.ACCEPTED);
+            godDto = godService.getGodByUserId(UUID.fromString(userDto.getId()));
+            helpRequestDto = godService.updateStatusForRequest(UUID.fromString(godDto.getId()), UUID.fromString(requestId), HelpRequestStatus.ACCEPTED);
         } catch (NonExistingEntityException e) {
             return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (IllegalArgumentException e) {
@@ -99,19 +93,22 @@ public class GodController {
         return ResponseEntity.ok(helpRequestDto);
     }
 
-    @PutMapping("/gods/{godId}/finish-request/{requestId}")
+    @PutMapping("/gods/finish-request/{requestId}")
     @ApiOperation(value = "Завершить заявку о помощи",
             notes = "Для запроса нужно быть авторизованным богом",
             response = ResponseEntity.class)
-    public ResponseEntity<HelpRequestDto> finishRequest(@RequestHeader String token, @PathVariable String godId, @PathVariable String requestId) {
+    public ResponseEntity<HelpRequestDto> finishRequest(@RequestHeader("soul-token") String token, @PathVariable String requestId) {
         HelpRequestDto helpRequestDto;
+        UserDto userDto;
+        GodDto godDto;
         try {
-            loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.GOD));
+            userDto = loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.GOD));
         } catch (AuthException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }
         try {
-            helpRequestDto = godService.updateStatusForRequest(UUID.fromString(godId), UUID.fromString(requestId), HelpRequestStatus.FINISHED);
+            godDto = godService.getGodByUserId(UUID.fromString(userDto.getId()));
+            helpRequestDto = godService.updateStatusForRequest(UUID.fromString(godDto.getId()), UUID.fromString(requestId), HelpRequestStatus.FINISHED);
         } catch (NonExistingEntityException e) {
             return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (IllegalArgumentException e) {
@@ -120,16 +117,23 @@ public class GodController {
         return ResponseEntity.ok(helpRequestDto);
     }
 
-    @GetMapping("/gods/{godId}/my-requests")
+    @GetMapping("/gods/my-requests")
     @ApiOperation(value = "Получить список запросов на выход из астрала, которые выполнил/выполняет бог",
             notes = "Для запроса нужно быть авторизованным админом/богом",
             response = ResponseEntity.class)
-    public ResponseEntity<List<HelpRequestDto>> getGodRequests(@RequestHeader String token, @PathVariable String godId) {
+    public ResponseEntity<List<HelpRequestDto>> getGodRequests(@RequestHeader("soul-token") String token) {
+        UserDto userDto;
+        GodDto godDto;
         try {
-            loginService.authoriseAndCheckPermission(token, Arrays.asList(UserRole.ADMIN, UserRole.GOD));
+            userDto = loginService.authoriseAndCheckPermission(token, Arrays.asList(UserRole.ADMIN, UserRole.GOD));
         } catch (AuthException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }
-        return ResponseEntity.ok(godService.getHelpRequestsByGodId(UUID.fromString(godId)));
+        try {
+            godDto = godService.getGodByUserId((UUID.fromString(userDto.getId())));
+        } catch (NonExistingEntityException e) {
+            return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(godService.getHelpRequestsByGodId(UUID.fromString(godDto.getId())));
     }
 }
