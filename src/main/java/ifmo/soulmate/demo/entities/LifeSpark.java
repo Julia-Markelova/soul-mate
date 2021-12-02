@@ -67,6 +67,13 @@ public class LifeSpark {
     public LifeSpark() {
     }
 
+    public LifeSpark(UUID id, Date receiveDate, UUID received_by, UUID personal_program_id) {
+        this.id = id;
+        this.receiveDate = receiveDate;
+        this.received_by = received_by;
+        this.personal_program_id = personal_program_id;
+    }
+
     public LifeSpark(UUID id, Date receiveDate, UUID received_by, UUID issued_by, UUID personal_program_id) {
         this.id = id;
         this.receiveDate = receiveDate;

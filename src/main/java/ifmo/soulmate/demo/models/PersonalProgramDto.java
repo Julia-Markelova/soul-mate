@@ -9,17 +9,15 @@ public class PersonalProgramDto {
     private String id;
     private String soulId;
     private PersonalProgramStatus status;
-    private Integer progress_percentage;
     private List<ExerciseDto> exercises;
 
     public PersonalProgramDto() {
     }
 
-    public PersonalProgramDto(String id, String soulId, PersonalProgramStatus status, Integer progress_percentage, List<ExerciseDto> exercises) {
+    public PersonalProgramDto(String id, String soulId, PersonalProgramStatus status, List<ExerciseDto> exercises) {
         this.id = id;
         this.soulId = soulId;
         this.status = status;
-        this.progress_percentage = progress_percentage;
         this.exercises = exercises;
     }
 
@@ -45,14 +43,6 @@ public class PersonalProgramDto {
 
     public void setStatus(PersonalProgramStatus status) {
         this.status = status;
-    }
-
-    public Integer getProgress_percentage() {
-        return progress_percentage;
-    }
-
-    public void setProgress_percentage(Integer progress_percentage) {
-        this.progress_percentage = progress_percentage;
     }
 
     public List<ExerciseDto> getExercises() {
