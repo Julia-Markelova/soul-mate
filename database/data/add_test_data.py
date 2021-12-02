@@ -49,6 +49,12 @@ surnames = [
 
 soul_statuses = ['UNBORN', 'BORN', 'LOST', 'DEAD']
 
+
+skills = ['Дружелюбие', 'Уверенность', 'Любопытство', 'Лидерство', 'Стойкость',
+          'Интеллект', 'Выносливость', 'Удача', 'Чистоплотность', 'Эгоизм',
+          'Сила', 'Внимательность', 'Харизма', 'Чувство юмора', 'Эмпатия']
+
+
 users = []
 gods = []
 souls = []
@@ -62,7 +68,7 @@ life_tickets = []
 
 users_count = 250
 life_souls = 50
-exercises_count = 50
+# exercises_count = 50
 
 for i in range(users_count):
     if i < len(god_names):
@@ -138,11 +144,11 @@ for i in range(len(alive_souls)):
             'notify_relative_about_soul': True,
         })
 
-for i in range(exercises_count):
+for i in range(len(skills)):
     exercises.append({
         'id': str(uuid4()),
         'name': f'ex_{i}',
-        'skill': f'skill_{i}'
+        'skill': skills[i]
     })
 
 for soul in souls:
