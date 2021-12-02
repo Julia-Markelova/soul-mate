@@ -12,12 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpSession;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-@SessionAttributes({"userId"})
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/admin")
@@ -35,9 +33,9 @@ public class AdminController {
     @ApiOperation(value = "Получить список душ",
             notes = "Для запроса нужно быть авторизованным админом",
             response = ResponseEntity.class)
-    public ResponseEntity<List<SoulDto>> getAllSouls(HttpSession session) {
+    public ResponseEntity<List<SoulDto>> getAllSouls(@RequestHeader String token) {
         try {
-            loginService.authoriseAndCheckPermission(session, Collections.singletonList(UserRole.ADMIN));
+            loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.ADMIN));
         } catch (AuthException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }
@@ -48,9 +46,9 @@ public class AdminController {
     @ApiOperation(value = "Получить информацию о режимах в системе",
             notes = "Для запроса нужно быть авторизованным админом",
             response = ResponseEntity.class)
-    public ResponseEntity<List<SystemModeDto>> getAllModes(HttpSession session) {
+    public ResponseEntity<List<SystemModeDto>> getAllModes(@RequestHeader String token) {
         try {
-            loginService.authoriseAndCheckPermission(session, Collections.singletonList(UserRole.ADMIN));
+            loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.ADMIN));
         } catch (AuthException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }
@@ -60,10 +58,10 @@ public class AdminController {
     @RequestMapping(value = "/changeMode", method = RequestMethod.GET)
     @ApiOperation(value = "Изменить режим системы: поставить ручной или автоматический",
             notes = "Для запроса нужно быть авторизованным админом.")
-    public ResponseEntity<String> changeMode(HttpSession session,
-                                     @RequestParam UUID modeId, @RequestParam boolean isManualMode) {
+    public ResponseEntity<String> changeMode(@RequestHeader String token,
+                                             @RequestParam UUID modeId, @RequestParam boolean isManualMode) {
         try {
-            loginService.authoriseAndCheckPermission(session, Collections.singletonList(UserRole.ADMIN));
+            loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.ADMIN));
         } catch (AuthException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }

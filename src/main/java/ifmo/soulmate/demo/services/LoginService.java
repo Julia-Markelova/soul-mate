@@ -6,13 +6,16 @@ import ifmo.soulmate.demo.entities.enums.UserRole;
 import ifmo.soulmate.demo.exceptions.AuthException;
 import ifmo.soulmate.demo.models.UserDto;
 import ifmo.soulmate.demo.repositories.UserRepository;
+import io.jsonwebtoken.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpSession;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -23,18 +26,53 @@ public class LoginService {
     private UserRepository userRepository;
     private static final Logger log = LogManager.getLogger(LoginController.class);
 
+    private final String jwtSecret = "top-secret-string";
+
+    public String generateToken(String userId) {
+        Date date = Date.from(LocalDate.now().plusDays(30).atStartOfDay(ZoneId.systemDefault()).toInstant());
+        return Jwts.builder()
+                .setSubject(userId)
+                .setExpiration(date)
+                .signWith(SignatureAlgorithm.HS512, jwtSecret)
+                .compact();
+    }
+
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token);
+            return true;
+        } catch (ExpiredJwtException expEx) {
+            log.warn("Token expired");
+        } catch (UnsupportedJwtException unsEx) {
+            log.warn("Unsupported jwt");
+        } catch (MalformedJwtException mjEx) {
+            log.warn("Malformed jwt");
+        } catch (SignatureException sEx) {
+            log.warn("Invalid signature");
+        } catch (Exception e) {
+            log.warn("invalid token");
+        }
+        return false;
+    }
+
+    public String getUserIdFromToken(String token) {
+        Claims claims = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
+        return claims.getSubject();
+    }
+
     public UserDto loginUser(String login, String password) throws AuthException {
         Optional<User> user = userRepository.getUserByLoginAndPassword(login, password);
         if (!user.isPresent()) {
             log.warn("Authentication failed: login = {}, password = {}", login, password);
             throw new AuthException("Wrong username or password", HttpStatus.UNAUTHORIZED);
         }
+        String token = generateToken(user.get().getId().toString());
         log.info("Authentication success: user {} logged in", user.get().getId());
-        return new UserDto((user.get().getId()).toString(), user.get().getRole(), user.get().getLogin());
+        return new UserDto((user.get().getId()).toString(), user.get().getRole(), user.get().getLogin(), token);
     }
 
-    public UserDto authoriseUser(HttpSession session) throws AuthException {
-        String userId = (String) session.getAttribute("userId");
+    public UserDto authoriseUser(String token) throws AuthException {
+        String userId = getUserIdFromToken(token);
         if (userId == null) {
             throw new AuthException("Unauthorized", HttpStatus.UNAUTHORIZED);
         }
@@ -59,8 +97,8 @@ public class LoginService {
         return hasPermission;
     }
 
-    public UserDto authoriseAndCheckPermission(HttpSession session, List<UserRole> acceptedRoles) throws AuthException {
-        UserDto user = authoriseUser(session);
+    public UserDto authoriseAndCheckPermission(String token, List<UserRole> acceptedRoles) throws AuthException {
+        UserDto user = authoriseUser(token);
         boolean hasPermission = hasPermission(user, acceptedRoles);
         if (hasPermission) {
             return user;

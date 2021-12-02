@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
 
-@SessionAttributes({"userId"})
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/")
