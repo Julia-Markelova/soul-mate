@@ -49,11 +49,9 @@ surnames = [
 
 soul_statuses = ['UNBORN', 'BORN', 'LOST', 'DEAD']
 
-
 skills = ['Дружелюбие', 'Уверенность', 'Любопытство', 'Лидерство', 'Стойкость',
           'Интеллект', 'Выносливость', 'Удача', 'Чистоплотность', 'Эгоизм',
           'Сила', 'Внимательность', 'Харизма', 'Чувство юмора', 'Эмпатия']
-
 
 users = []
 gods = []
@@ -67,38 +65,91 @@ life_sparks = []
 life_tickets = []
 
 users_count = 250
-life_souls = 50
-# exercises_count = 50
+souls_count = 100
+relative_count = 10
+mentors_count = 10
+life_souls = 20
 
-for i in range(users_count):
-    if i < len(god_names):
-        role = 'GOD'
-        login = f'god_{i}'
-    else:
-        role = 'SOUL'
-        login = f'soul_{i}'
+for i in range(len(god_names)):
+    user_id = str(uuid4())
     users.append({
-        'id': str(uuid4()),
-        'login': login,
+        'id': user_id,
+        'login': f'god_{i}',
         'password': '1234',
-        'role': role
+        'role': 'GOD'
+    })
+    gods.append({
+        'id': str(uuid4()),
+        'user_id': user_id,
+        'name': god_names[i],
     })
 
-for i in range(users_count):
-    if i < len(god_names):
-        gods.append({
-            'id': str(uuid4()),
-            'user_id': users[i]['id'],
-            'name': god_names[i],
-        })
-    else:
-        status = random.choice(soul_statuses)
-        souls.append({
-            'id': str(uuid4()),
-            'user_id': users[i]['id'],
-            'status': status,
-            'is_mentor': False if status != 'DEAD' else random.choice([True, False])
-        })
+for i in range(souls_count):
+    user_id = str(uuid4())
+    users.append({
+        'id': user_id,
+        'login': f'soul_{i}',
+        'password': '1234',
+        'role': 'SOUL'
+    })
+    status = random.choice(soul_statuses)
+    souls.append({
+        'id': str(uuid4()),
+        'user_id': user_id,
+        'status': status,
+        'is_mentor': False
+    })
+
+for i in range(relative_count):
+    user_id = str(uuid4())
+    soul_id = str(uuid4())
+    users.append({
+        'id': user_id,
+        'login': f'relative_{i}',
+        'password': '1234',
+        'role': 'RELATIVE'
+    })
+    souls.append({
+        'id': soul_id,
+        'user_id': user_id,
+        'status': 'BORN',
+        'is_mentor': False
+    })
+    is_men = random.choice([True, False])
+    born_years_ago = random.randint(15, 60)
+
+    life_id = str(uuid4())
+    lifes.append({
+        'id': life_id,
+        'soul_id': soul_id,
+        'karma': random.randint(0, 100),
+        'soul_name': random.choice(men_names) if is_men else random.choice(women_names),
+        'soul_surname': random.choice(surnames) if is_men else f'{random.choice(surnames)}a',
+        'date_of_birth': datetime.datetime.now() - datetime.timedelta(days=365 * born_years_ago),
+        'date_of_death': None,
+    })
+
+    soul_relatives.append({
+        'id': str(uuid4()),
+        'soul_id': soul_id,
+        'relative_id': life_id,
+        'notify_relative_about_soul': True,
+    })
+
+for i in range(mentors_count):
+    user_id = str(uuid4())
+    users.append({
+        'id': user_id,
+        'login': f'mentor_{i}',
+        'password': '1234',
+        'role': 'MENTOR'
+    })
+    souls.append({
+        'id': str(uuid4()),
+        'user_id': user_id,
+        'status': 'DEAD',
+        'is_mentor': True
+    })
 
 # create admin
 users.append({
@@ -133,16 +184,16 @@ for soul in souls[:life_souls]:
 dead_souls = [soul for soul in lifes if soul['date_of_death'] is not None]
 alive_souls = [soul for soul in lifes if soul['date_of_death'] is None]
 mentors = [soul for soul in souls if soul['is_mentor']]
-
-for i in range(len(alive_souls)):
-    relatives = random.randint(0, 2)
-    for j in range(relatives):
-        soul_relatives.append({
-            'id': str(uuid4()),
-            'soul_id': random.choice(dead_souls)['soul_id'],
-            'relative_id': alive_souls[i]['id'],
-            'notify_relative_about_soul': True,
-        })
+#
+# for i in range(len(alive_souls)):
+#     relatives = random.randint(0, 2)
+#     for j in range(relatives):
+#         soul_relatives.append({
+#             'id': str(uuid4()),
+#             'soul_id': random.choice(dead_souls)['soul_id'],
+#             'relative_id': alive_souls[i]['id'],
+#             'notify_relative_about_soul': True,
+#         })
 
 for i in range(len(skills)):
     exercises.append({
@@ -250,5 +301,3 @@ if __name__ == '__main__':
 
     except psycopg2.errors.UniqueViolation:
         print('Данные в бд уже добавлены.')
-
-

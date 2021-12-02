@@ -4,4 +4,6 @@ public enum UserRole {
     ADMIN,
     GOD,
     SOUL,
+    RELATIVE,
+    MENTOR,
 }
