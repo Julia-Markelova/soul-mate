@@ -162,4 +162,34 @@ public class SoulController {
                 ResponseEntity.ok(personalProgramService.createPersonalProgram(UUID.fromString(userDto.getRoleId()), numberOfExercisesInPersonalProgram)));
     }
 
+    @PutMapping("/souls/personal-program/update-exercise-progress/{exerciseId}")
+    @ApiOperation(value = "Обновить прогресс по упражнению в персональной программе. ",
+            notes = "Если программы нет - ошибка. Иначе - устанавливает прогресс по упражнению " +
+                    "в переданное значение. Значение должно быть в диапазоне [0, 100]. " +
+                    "Если после обновления прогресса все упражнения будут завершены, то у программы " +
+                    "обновится статус на SUCCESS." +
+                    "Для запроса нужно быть авторизованным админом/душой",
+            response = ResponseEntity.class)
+    public ResponseEntity<PersonalProgramDto> updateExerciseProgress(@RequestHeader("soul-token") String token,
+                                                                     @PathVariable String exerciseId,
+                                                                     @RequestParam Integer progress) {
+        UserDto userDto;
+        try {
+            userDto = loginService.authoriseAndCheckPermission(token, Arrays.asList(UserRole.ADMIN, UserRole.SOUL));
+        } catch (NonExistingEntityException | AuthException ex) {
+            return new ResponseEntity(ex.getMessage(), ex.getStatus());
+        }
+        Optional<PersonalProgramDto> programDto = personalProgramService.getPersonalProgramBySoulId(UUID.fromString(userDto.getRoleId()));
+        if (programDto.isPresent()) {
+            try {
+                personalProgramService.updateProgramExerciseProgress(UUID.fromString(programDto.get().getId()), UUID.fromString(exerciseId), progress);
+            } catch (NonExistingEntityException ex) {
+                return new ResponseEntity(ex.getMessage(), ex.getStatus());
+            } catch (IllegalArgumentException ex) {
+                return new ResponseEntity(ex.getMessage(), HttpStatus.BAD_REQUEST);
+            }
+        }
+        programDto = personalProgramService.getPersonalProgramBySoulId(UUID.fromString(userDto.getRoleId()));
+        return programDto.map(ResponseEntity::ok).orElseGet(() -> new ResponseEntity("No personal program found", HttpStatus.NOT_FOUND));
+    }
 }

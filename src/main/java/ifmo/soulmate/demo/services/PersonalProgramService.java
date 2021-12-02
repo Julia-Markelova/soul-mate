@@ -100,9 +100,10 @@ public class PersonalProgramService {
         if (isAllExercisesInProgramFinished(programId)) {
             updatePersonalProgramStatus(programId, PersonalProgramStatus.SUCCESS);
             log.info(String.format("Program %s was successfully finished", programId.toString()));
+        } else {
+            updatePersonalProgramStatus(programId, PersonalProgramStatus.IN_PROGRESS);
+            log.info(String.format("Program %s in progress", programId.toString()));
         }
-        updatePersonalProgramStatus(programId, PersonalProgramStatus.IN_PROGRESS);
-        log.info(String.format("Program %s in progress", programId.toString()));
     }
 
     public PersonalProgramDto createPersonalProgram(UUID soulId, Integer numberOfExercises) {
@@ -160,16 +161,13 @@ public class PersonalProgramService {
                 // создаем новую искру жизни, если стоит автоматический режим
                 SystemMode mode = systemModeRepository.findSystemModeByType(SystemModeType.LIFE_SPARK_MODE);
                 if (!mode.getIsManualMode()) {
-                    createAndSaveLifeSpark(personalProgram.get().getSoulId(), personalProgram.get().getId());
+                    LifeSpark lifeSpark = new LifeSpark(UUID.randomUUID(), new Date(), personalProgram.get().getSoulId(), personalProgram.get().getSoulId(), personalProgram.get().getId());
+                    lifeSparkRepository.saveAndFlush(lifeSpark);
                 }
             }
         }
     }
 
-    private void createAndSaveLifeSpark(UUID programId, UUID soulId) {
-        LifeSpark lifeSpark = new LifeSpark(UUID.randomUUID(), new Date(), soulId, programId);
-        lifeSparkRepository.saveAndFlush(lifeSpark);
-    }
 
     private boolean isAllExercisesInProgramFinished(UUID programId) throws NonExistingEntityException {
         Optional<PersonalProgram> personalProgram = personalProgramRepository.findById(programId);
