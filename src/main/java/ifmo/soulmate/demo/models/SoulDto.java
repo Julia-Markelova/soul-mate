@@ -4,8 +4,18 @@ import ifmo.soulmate.demo.entities.enums.SoulStatus;
 
 public class SoulDto {
     private String id;
-    private SoulStatus type;
+    private SoulStatus status;
     private String info;
+
+    public boolean isMentor() {
+        return isMentor;
+    }
+
+    public void setMentor(boolean mentor) {
+        isMentor = mentor;
+    }
+
+    private boolean isMentor;
 
     public String getId() {
         return id;
@@ -15,12 +25,12 @@ public class SoulDto {
         this.id = id;
     }
 
-    public SoulStatus getType() {
-        return type;
+    public SoulStatus getStatus() {
+        return status;
     }
 
-    public void setType(SoulStatus type) {
-        this.type = type;
+    public void setStatus(SoulStatus status) {
+        this.status = status;
     }
 
     public String getInfo() {
@@ -34,9 +44,10 @@ public class SoulDto {
     public SoulDto() {
     }
 
-    public SoulDto(String id, SoulStatus type, String info) {
+    public SoulDto(String id, SoulStatus status, String info, boolean isMentor) {
         this.id = id;
-        this.type = type;
+        this.status = status;
         this.info = info;
+        this.isMentor = isMentor;
     }
 }

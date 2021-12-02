@@ -43,7 +43,7 @@ public class SoulService {
         }
         log.info("Get soul by userId {}", userId);
         Soul unwrapped = soul.get();
-        return new SoulDto(unwrapped.getId().toString(), unwrapped.getStatus(), "");
+        return new SoulDto(unwrapped.getId().toString(), unwrapped.getStatus(), "", unwrapped.getIsMentor());
     }
 
     private void notifyRelativesAboutSoulStatus(Soul updatedSoul) {
@@ -102,7 +102,7 @@ public class SoulService {
                 .stream()
                 .map(x -> {
                     try {
-                        return new SoulDto(x.getId().toString(), x.getStatus(), getRandomStatus(x.getStatus()));
+                        return new SoulDto(x.getId().toString(), x.getStatus(), getRandomStatus(x.getStatus()), x.getIsMentor());
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -112,7 +112,7 @@ public class SoulService {
                 .collect(Collectors.toList());
     }
 
-    public void updateSoulStatus(UUID soulId, SoulStatus status) {
+    public SoulDto updateSoulStatus(UUID soulId, SoulStatus status) throws NonExistingEntityException {
         Optional<Soul> soul = soulRepository.findById(soulId);
         if (soul.isPresent()) {
             Soul unwrapped = soul.get();
@@ -121,10 +121,14 @@ public class SoulService {
                 soulRepository.saveAndFlush(unwrapped);
                 notifyRelativesAboutSoulStatus(unwrapped);
             }
+            return new SoulDto(unwrapped.getId().toString(), unwrapped.getStatus(), "", unwrapped.getIsMentor());
         }
+        String msg = (String.format("No soul found with id: %s", soulId.toString()));
+        log.warn(msg);
+        throw new NonExistingEntityException(msg);
     }
 
-    public void updateSoulMentor(UUID soulId, Boolean isMentor) {
+    public SoulDto updateSoulMentor(UUID soulId, Boolean isMentor) throws NonExistingEntityException {
         Optional<Soul> soul = soulRepository.findById(soulId);
         if (soul.isPresent()) {
             Soul unwrapped = soul.get();
@@ -133,7 +137,11 @@ public class SoulService {
                 soulRepository.saveAndFlush(unwrapped);
                 notifyRelativesAboutSoulMentor(unwrapped);
             }
+            return new SoulDto(unwrapped.getId().toString(), unwrapped.getStatus(), "", unwrapped.getIsMentor());
         }
+        String msg = (String.format("No soul found with id: %s", soulId.toString()));
+        log.warn(msg);
+        throw new NonExistingEntityException(msg);
     }
 
     public HelpRequestDto createNewHelpRequest(UUID soulId) throws NonExistingEntityException {
