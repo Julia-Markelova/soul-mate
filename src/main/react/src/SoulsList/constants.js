@@ -18,7 +18,7 @@ export const soulColumns = [
     },
     {
         field: 'info',
-        headerName: 'Дополнительная ифнормация',
+        headerName: 'Дополнительная информация',
         width: 600
     }
 ];
