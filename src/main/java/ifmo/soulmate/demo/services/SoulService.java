@@ -141,6 +141,13 @@ public class SoulService {
         if (soul.isPresent()) {
             Soul unwrapped = soul.get();
             if (unwrapped.getStatus() == SoulStatus.LOST) {
+                List<HelpRequest> newHelpRequests = helpRequestRepository.getByCreatedByAndStatus(soulId, HelpRequestStatus.NEW);
+                List<HelpRequest> acceptedHelpRequests = helpRequestRepository.getByCreatedByAndStatus(soulId, HelpRequestStatus.ACCEPTED);
+                if (newHelpRequests.size() > 0 || acceptedHelpRequests.size() > 0) {
+                    String msg = (String.format("Soul %s has already opened requests", soulId.toString()));
+                    log.warn(msg);
+                    throw new IllegalArgumentException(msg);
+                }
                 HelpRequest helpRequest = new HelpRequest(UUID.randomUUID(), HelpRequestStatus.NEW, soulId);
                 helpRequestRepository.saveAndFlush(helpRequest);
                 return new HelpRequestDto(helpRequest.getId().toString(), helpRequest.getCreatedBy().toString(), helpRequest.getStatus());

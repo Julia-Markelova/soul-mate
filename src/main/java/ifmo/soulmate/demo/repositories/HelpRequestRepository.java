@@ -9,6 +9,7 @@ import java.util.UUID;
 
 public interface HelpRequestRepository extends JpaRepository<HelpRequest, UUID> {
     List<HelpRequest> getByCreatedBy(UUID createdBy);
+    List<HelpRequest> getByCreatedByAndStatus(UUID createdBy, HelpRequestStatus status);
     List<HelpRequest> getByAcceptedBy(UUID acceptedBy);
     List<HelpRequest> getByStatus(HelpRequestStatus status);
     List<HelpRequest> getByAcceptedByAndStatus(UUID acceptedBy, HelpRequestStatus status);
