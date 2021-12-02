@@ -213,7 +213,7 @@ for soul in souls:
         has_program = random.choice([True, False])
         created_date = datetime.datetime.now() - datetime.timedelta(days=random.randint(1, 31))
         progress = random.randint(0, 99)
-        status = 'NEW' if progress == 0 else 'IN_PROGRESS'
+        status = 'NEW'
     if has_program:
         personal_programs.append({
             'id': str(uuid4()),
