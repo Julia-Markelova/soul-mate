@@ -1,10 +1,7 @@
 package ifmo.soulmate.demo.services;
 
 import ifmo.soulmate.demo.controllers.LoginController;
-import ifmo.soulmate.demo.entities.HelpRequest;
-import ifmo.soulmate.demo.entities.Life;
-import ifmo.soulmate.demo.entities.Message;
-import ifmo.soulmate.demo.entities.Soul;
+import ifmo.soulmate.demo.entities.*;
 import ifmo.soulmate.demo.entities.enums.HelpRequestStatus;
 import ifmo.soulmate.demo.entities.enums.MessageStatus;
 import ifmo.soulmate.demo.entities.enums.SoulStatus;
@@ -37,6 +34,18 @@ public class SoulService {
 
     private final Random random = new Random();
 
+    public SoulDto getSoulByUserId(UUID userId) throws NonExistingEntityException {
+        Optional<Soul> soul = soulRepository.getByUserId(userId);
+        if (!soul.isPresent()) {
+            String msg = (String.format("No soul found with userId: %s", userId.toString()));
+            log.warn(msg);
+            throw new NonExistingEntityException(msg);
+        }
+        log.info("Get soul by userId {}", userId);
+        Soul unwrapped = soul.get();
+        return new SoulDto(unwrapped.getId().toString(), unwrapped.getStatus(), "");
+    }
+
     private void notifyRelativesAboutSoulStatus(Soul updatedSoul) {
         List<UUID> relativesForNotify =
                 isoulRelativeRepository.getRelativesWithAllowedNotificationsForSoulId(updatedSoul.getId());
@@ -57,7 +66,7 @@ public class SoulService {
         for (UUID relativeId : relativesForNotify) {
             Life relative = iLifesRepository.getById(relativeId);
             String mentor;
-            if (updatedSoul.getIs_mentor()) {
+            if (updatedSoul.getIsMentor()) {
                 mentor = "стала наствником";
             } else {
                 mentor = "перестала быть наставником";
@@ -119,8 +128,8 @@ public class SoulService {
         Optional<Soul> soul = soulRepository.findById(soulId);
         if (soul.isPresent()) {
             Soul unwrapped = soul.get();
-            if (unwrapped.getIs_mentor() != isMentor) {
-                unwrapped.setIs_mentor(isMentor);
+            if (unwrapped.getIsMentor() != isMentor) {
+                unwrapped.setIsMentor(isMentor);
                 soulRepository.saveAndFlush(unwrapped);
                 notifyRelativesAboutSoulMentor(unwrapped);
             }

@@ -5,9 +5,7 @@ import ifmo.soulmate.demo.entities.enums.SoulStatus;
 import ifmo.soulmate.demo.entities.enums.UserRole;
 import ifmo.soulmate.demo.exceptions.AuthException;
 import ifmo.soulmate.demo.exceptions.NonExistingEntityException;
-import ifmo.soulmate.demo.models.HelpRequestDto;
-import ifmo.soulmate.demo.models.MessageDto;
-import ifmo.soulmate.demo.models.PersonalProgramDto;
+import ifmo.soulmate.demo.models.*;
 import ifmo.soulmate.demo.services.*;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -133,5 +131,21 @@ public class SoulController {
                 ResponseEntity.ok(personalProgramService.createPersonalProgram(UUID.fromString(soulId), numberOfExercisesInPersonalProgram)));
     }
 
+    @GetMapping("/souls/get-by-userId/{userId}")
+    @ApiOperation(value = "Получить информацию о душе по юзер-ид",
+            notes = "Для запроса нужно быть авторизованным админом/душой",
+            response = ResponseEntity.class)
+    public ResponseEntity<SoulDto> getGodByUserId(@RequestHeader String token, @PathVariable String userId) {
+        try {
+            loginService.authoriseAndCheckPermission(token, Arrays.asList(UserRole.ADMIN, UserRole.SOUL));
+        } catch (AuthException ex) {
+            return new ResponseEntity(ex.getMessage(), ex.getStatus());
+        }
+        try {
+            return ResponseEntity.ok(soulService.getSoulByUserId(UUID.fromString(userId)));
+        } catch (NonExistingEntityException e) {
+            return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
 
 }

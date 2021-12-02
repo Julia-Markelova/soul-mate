@@ -18,19 +18,19 @@ public class Soul {
     private SoulStatus status;
 
     @Column(name = "user_id")
-    private UUID user_id;
+    private UUID userId;
 
     @Column(name = "is_mentor")
-    private boolean is_mentor;
+    private boolean isMentor;
 
     public Soul() {
     }
 
-    public Soul(UUID id, SoulStatus status, UUID user_id, boolean is_mentor) {
+    public Soul(UUID id, SoulStatus status, UUID userId, boolean isMentor) {
         this.id = id;
         this.status = status;
-        this.user_id = user_id;
-        this.is_mentor = is_mentor;
+        this.userId = userId;
+        this.isMentor = isMentor;
     }
 
     public UUID getId() {
@@ -49,19 +49,19 @@ public class Soul {
         this.status = status;
     }
 
-    public UUID getUser_id() {
-        return user_id;
+    public UUID getUserId() {
+        return userId;
     }
 
-    public void setUser_id(UUID user_id) {
-        this.user_id = user_id;
+    public void setUserId(UUID user_id) {
+        this.userId = user_id;
     }
 
-    public boolean getIs_mentor() {
-        return is_mentor;
+    public boolean getIsMentor() {
+        return isMentor;
     }
 
-    public void setIs_mentor(boolean is_mentor) {
-        this.is_mentor = is_mentor;
+    public void setIsMentor(boolean is_mentor) {
+        this.isMentor = is_mentor;
     }
 }
