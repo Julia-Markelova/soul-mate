@@ -85,7 +85,7 @@ public class GodService {
         return mapResult(requests);
     }
 
-    public void updateStatusForRequest(UUID godId, UUID requestId, HelpRequestStatus status) throws NonExistingEntityException {
+    public HelpRequestDto updateStatusForRequest(UUID godId, UUID requestId, HelpRequestStatus status) throws NonExistingEntityException {
         Optional<HelpRequest> request = helpRequestRepository.findById(requestId);
         Optional<God> god = godRepository.findById(godId);
         if (!request.isPresent() || !god.isPresent()) {
@@ -102,6 +102,7 @@ public class GodService {
             req.setStatus(status);
             req.setAcceptedBy(godId);
             helpRequestRepository.saveAndFlush(req);
+            return new HelpRequestDto(req.getId().toString(), req.getCreatedBy().toString(), req.getAcceptedBy().toString(), req.getStatus());
         }
         else {
             throw new IllegalArgumentException("Can not update such request with such status");

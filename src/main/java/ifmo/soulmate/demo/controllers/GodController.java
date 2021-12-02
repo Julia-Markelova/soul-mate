@@ -82,40 +82,42 @@ public class GodController {
     @ApiOperation(value = "Принять запрос о помощи",
             notes = "Для запроса нужно быть авторизованным богом",
             response = ResponseEntity.class)
-    public ResponseEntity<String> acceptRequest(@RequestHeader String token, @PathVariable String godId, @PathVariable String requestId) {
+    public ResponseEntity<HelpRequestDto> acceptRequest(@RequestHeader String token, @PathVariable String godId, @PathVariable String requestId) {
+        HelpRequestDto helpRequestDto;
         try {
             loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.GOD));
         } catch (AuthException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }
         try {
-            godService.updateStatusForRequest(UUID.fromString(godId), UUID.fromString(requestId), HelpRequestStatus.ACCEPTED);
+            helpRequestDto = godService.updateStatusForRequest(UUID.fromString(godId), UUID.fromString(requestId), HelpRequestStatus.ACCEPTED);
         } catch (NonExistingEntityException e) {
             return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
-        return ResponseEntity.ok("Request accepted");
+        return ResponseEntity.ok(helpRequestDto);
     }
 
     @PutMapping("/gods/{godId}/finish-request/{requestId}")
     @ApiOperation(value = "Завершить заявку о помощи",
             notes = "Для запроса нужно быть авторизованным богом",
             response = ResponseEntity.class)
-    public ResponseEntity<String> finishRequest(@RequestHeader String token, @PathVariable String godId, @PathVariable String requestId) {
+    public ResponseEntity<HelpRequestDto> finishRequest(@RequestHeader String token, @PathVariable String godId, @PathVariable String requestId) {
+        HelpRequestDto helpRequestDto;
         try {
             loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.GOD));
         } catch (AuthException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }
         try {
-            godService.updateStatusForRequest(UUID.fromString(godId), UUID.fromString(requestId), HelpRequestStatus.FINISHED);
+            helpRequestDto = godService.updateStatusForRequest(UUID.fromString(godId), UUID.fromString(requestId), HelpRequestStatus.FINISHED);
         } catch (NonExistingEntityException e) {
             return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
-        return ResponseEntity.ok("Request finished");
+        return ResponseEntity.ok(helpRequestDto);
     }
 
     @GetMapping("/gods/{godId}/my-requests")
