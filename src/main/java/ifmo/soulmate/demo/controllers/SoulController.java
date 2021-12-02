@@ -80,19 +80,22 @@ public class SoulController {
         return ResponseEntity.ok(notificationService.getSubscriptionStatus(UUID.fromString(relativeId)));
     }
 
-    @PostMapping("/souls/{soulId}/create-help-request")
+    @PostMapping("/souls/create-help-request")
     @ApiOperation(value = "Создает заявку на выход из астрала",
             notes = "Для запроса нужно быть авторизованной душой",
             response = ResponseEntity.class)
-    public ResponseEntity<HelpRequestDto> createHelpRequest(@RequestHeader String token, @PathVariable String soulId) throws NonExistingEntityException {
+    public ResponseEntity<HelpRequestDto> createHelpRequest(@RequestHeader("soul-token") String token) throws NonExistingEntityException {
+        UserDto userDto;
+        SoulDto soulDto;
         try {
-            loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.SOUL));
+            userDto = loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.SOUL));
         } catch (AuthException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }
         HelpRequestDto helpRequestDto;
         try {
-            helpRequestDto = soulService.createNewHelpRequest(UUID.fromString(soulId));
+            soulDto = soulService.getSoulByUserId(UUID.fromString(userDto.getId()));
+            helpRequestDto = soulService.createNewHelpRequest(UUID.fromString(soulDto.getId()));
         } catch (NonExistingEntityException e) {
             return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (IllegalArgumentException e) {
@@ -101,51 +104,47 @@ public class SoulController {
         return ResponseEntity.ok(helpRequestDto);
     }
 
-    @GetMapping("/souls/{soulId}/my-requests")
+    @GetMapping("/souls/my-requests")
     @ApiOperation(value = "Получить список запросов на выход из астрала, которые созданы душой",
             notes = "Для запроса нужно быть авторизованным админом/душой",
             response = ResponseEntity.class)
-    public ResponseEntity<List<HelpRequestDto>> getGodRequests(@RequestHeader String token, @PathVariable String soulId) {
+    public ResponseEntity<List<HelpRequestDto>> getGodRequests(@RequestHeader("soul-token") String token) {
+        UserDto userDto;
+        SoulDto soulDto;
         try {
-            loginService.authoriseAndCheckPermission(token, Arrays.asList(UserRole.ADMIN, UserRole.SOUL));
+            userDto = loginService.authoriseAndCheckPermission(token, Arrays.asList(UserRole.ADMIN, UserRole.SOUL));
         } catch (AuthException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }
-        return ResponseEntity.ok(soulService.getHelpRequestsBySoulId(UUID.fromString(soulId)));
+        try {
+            soulDto = soulService.getSoulByUserId(UUID.fromString(userDto.getId()));
+        } catch (NonExistingEntityException e) {
+            return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(soulService.getHelpRequestsBySoulId(UUID.fromString(soulDto.getId())));
     }
 
-    @GetMapping("/souls/{soulId}/personal-program")
+    @GetMapping("/souls/personal-program")
     @ApiOperation(value = "Получить информацию о персональной программе. " +
             "Если программы еще нет, то она будет создана автоматически.",
             notes = "Для запроса нужно быть авторизованной душой. Количество упражнений в каждой программе фиксированно." +
                     "Задается в контроллеле души. По умолчанию 5.",
             response = ResponseEntity.class)
-    public ResponseEntity<PersonalProgramDto> getPersonalProgram(@RequestHeader String token, @PathVariable String soulId) {
+    public ResponseEntity<PersonalProgramDto> getPersonalProgram(@RequestHeader("soul-token") String token) {
+        UserDto userDto;
+        SoulDto soulDto;
         try {
-            loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.SOUL));
-        } catch (AuthException ex) {
-            return new ResponseEntity(ex.getMessage(), ex.getStatus());
-        }
-        Optional<PersonalProgramDto> personalProgram = personalProgramService.getPersonalProgramBySoulId(UUID.fromString(soulId));
-        return personalProgram.map(ResponseEntity::ok).orElseGet(() ->
-                ResponseEntity.ok(personalProgramService.createPersonalProgram(UUID.fromString(soulId), numberOfExercisesInPersonalProgram)));
-    }
-
-    @GetMapping("/souls/get-by-userId/{userId}")
-    @ApiOperation(value = "Получить информацию о душе по юзер-ид",
-            notes = "Для запроса нужно быть авторизованным админом/душой",
-            response = ResponseEntity.class)
-    public ResponseEntity<SoulDto> getGodByUserId(@RequestHeader String token, @PathVariable String userId) {
-        try {
-            loginService.authoriseAndCheckPermission(token, Arrays.asList(UserRole.ADMIN, UserRole.SOUL));
+            userDto = loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.SOUL));
         } catch (AuthException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }
         try {
-            return ResponseEntity.ok(soulService.getSoulByUserId(UUID.fromString(userId)));
+            soulDto = soulService.getSoulByUserId(UUID.fromString(userDto.getId()));
         } catch (NonExistingEntityException e) {
             return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
         }
+        Optional<PersonalProgramDto> personalProgram = personalProgramService.getPersonalProgramBySoulId(UUID.fromString(soulDto.getId()));
+        return personalProgram.map(ResponseEntity::ok).orElseGet(() ->
+                ResponseEntity.ok(personalProgramService.createPersonalProgram(UUID.fromString(soulDto.getId()), numberOfExercisesInPersonalProgram)));
     }
-
 }
