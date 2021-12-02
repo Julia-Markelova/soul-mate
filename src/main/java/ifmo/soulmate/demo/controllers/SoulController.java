@@ -70,22 +70,42 @@ public class SoulController {
         return ResponseEntity.ok(lifeTicketService.getNotUsedLifeTicket(UUID.fromString(userDto.getRoleId())));
     }
 
-    @PutMapping("/souls/{soulId}/life-tickets/{ticketId}")
-    public ResponseEntity receiveLifeTicket(@PathVariable String soulId, @PathVariable String ticketId) {
-        lifeTicketService.receiveLifeTicket(UUID.fromString(soulId), UUID.fromString(ticketId));
+    @PutMapping("/souls/receive-life-ticket/{ticketId}")
+    public ResponseEntity receiveLifeTicket(@RequestHeader("soul-token") String token, @PathVariable String ticketId) {
+        UserDto userDto;
+        try {
+            userDto = loginService.authoriseAndCheckPermission(token, Arrays.asList(UserRole.ADMIN, UserRole.SOUL));
+        } catch (NonExistingEntityException | AuthException ex) {
+            return new ResponseEntity(ex.getMessage(), ex.getStatus());
+        }
+        lifeTicketService.receiveLifeTicket(UUID.fromString(userDto.getRoleId()), UUID.fromString(ticketId));
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/souls/{soulId}/update/status/{status}")
-    public ResponseEntity updateSoulStatus(@PathVariable String soulId, @PathVariable String status) {
-        soulService.updateSoulStatus(UUID.fromString(soulId), SoulStatus.valueOf(status));
-        return ResponseEntity.ok().build();
+    @PutMapping("/souls/update/status/{status}")
+    public ResponseEntity<SoulDto> updateSoulStatus(@RequestHeader("soul-token") String token, @PathVariable String status) {
+        UserDto userDto;
+        SoulDto soulDto;
+        try {
+            userDto = loginService.authoriseAndCheckPermission(token, Arrays.asList(UserRole.ADMIN, UserRole.SOUL));
+            soulDto = soulService.updateSoulStatus(UUID.fromString(userDto.getRoleId()), SoulStatus.valueOf(status));
+        } catch (NonExistingEntityException | AuthException ex) {
+            return new ResponseEntity(ex.getMessage(), ex.getStatus());
+        }
+        return ResponseEntity.ok(soulDto);
     }
 
-    @PutMapping("/souls/{soulId}/update/mentor/{isMentor}")
-    public ResponseEntity updateSoulMentor(@PathVariable String soulId, @PathVariable Boolean isMentor) {
-        soulService.updateSoulMentor(UUID.fromString(soulId), isMentor);
-        return ResponseEntity.ok().build();
+    @PutMapping("/souls/update/mentor/{isMentor}")
+    public ResponseEntity<SoulDto> updateSoulMentor(@RequestHeader("soul-token") String token, @PathVariable Boolean isMentor) {
+        UserDto userDto;
+        SoulDto soulDto;
+        try {
+            userDto = loginService.authoriseAndCheckPermission(token, Arrays.asList(UserRole.ADMIN, UserRole.SOUL));
+            soulDto = soulService.updateSoulMentor(UUID.fromString(userDto.getRoleId()), isMentor);
+        } catch (NonExistingEntityException | AuthException ex) {
+            return new ResponseEntity(ex.getMessage(), ex.getStatus());
+        }
+        return ResponseEntity.ok(soulDto);
     }
 
     @PostMapping("/souls/create-help-request")
