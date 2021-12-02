@@ -1,6 +1,8 @@
 package ifmo.soulmate.demo.controllers;
 
 import ifmo.soulmate.demo.exceptions.AuthException;
+import ifmo.soulmate.demo.exceptions.MainApiException;
+import ifmo.soulmate.demo.exceptions.NonExistingEntityException;
 import ifmo.soulmate.demo.models.UserDto;
 import ifmo.soulmate.demo.services.LoginService;
 import io.swagger.annotations.ApiOperation;
@@ -23,7 +25,7 @@ public class LoginController {
             UserDto user = loginService.loginUser(login, password);
             return ResponseEntity.ok(user);
 
-        } catch (AuthException ex) {
+        } catch (MainApiException ex) {
             return new ResponseEntity("Wrong login or password", HttpStatus.UNAUTHORIZED);
         }
     }
@@ -35,7 +37,7 @@ public class LoginController {
             loginService.authoriseUser(token);
             return ResponseEntity.ok("Success logout");
 
-        } catch (AuthException ex) {
+        } catch (AuthException | NonExistingEntityException ex) {
             return new ResponseEntity("Wrong login or password", HttpStatus.UNAUTHORIZED);
         }
     }
@@ -47,7 +49,7 @@ public class LoginController {
             UserDto user = loginService.authoriseUser(token);
             return ResponseEntity.ok(user);
 
-        } catch (AuthException ex) {
+        } catch (AuthException | NonExistingEntityException ex) {
             return new ResponseEntity("Authorization error", HttpStatus.UNAUTHORIZED);
         }
     }

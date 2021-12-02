@@ -4,8 +4,12 @@ import ifmo.soulmate.demo.entities.LifeTicket;
 import ifmo.soulmate.demo.entities.enums.SoulStatus;
 import ifmo.soulmate.demo.entities.enums.UserRole;
 import ifmo.soulmate.demo.exceptions.AuthException;
+import ifmo.soulmate.demo.exceptions.MainApiException;
 import ifmo.soulmate.demo.exceptions.NonExistingEntityException;
-import ifmo.soulmate.demo.models.*;
+import ifmo.soulmate.demo.models.HelpRequestDto;
+import ifmo.soulmate.demo.models.PersonalProgramDto;
+import ifmo.soulmate.demo.models.SoulDto;
+import ifmo.soulmate.demo.models.UserDto;
 import ifmo.soulmate.demo.services.*;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,9 +41,33 @@ public class SoulController {
 
     private final int numberOfExercisesInPersonalProgram = 5;
 
-    @GetMapping("/souls/{id}/life-tickets")
-    public ResponseEntity<LifeTicket> getLifeTicket(@PathVariable String id) {
-        return ResponseEntity.ok(lifeTicketService.getNotUsedLifeTicket(UUID.fromString(id)));
+    @GetMapping("/souls/profile")
+    @ApiOperation(value = "Получить информацию о душе",
+            notes = "Для запроса нужно быть авторизованной душой",
+            response = ResponseEntity.class)
+    public ResponseEntity<SoulDto> getSoulProfile(@RequestHeader("soul-token") String token) {
+        UserDto userDto;
+        try {
+            userDto = loginService.authoriseAndCheckPermission(token, Arrays.asList(UserRole.ADMIN, UserRole.SOUL));
+        } catch (MainApiException ex) {
+            return new ResponseEntity(ex.getMessage(), ex.getStatus());
+        }
+        try {
+            return ResponseEntity.ok(soulService.getSoulByUserId(UUID.fromString(userDto.getId())));
+        } catch (NonExistingEntityException e) {
+            return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/souls/life-tickets")
+    public ResponseEntity<LifeTicket> getLifeTicket(@RequestHeader("soul-token") String token) {
+        UserDto userDto;
+        try {
+            userDto = loginService.authoriseAndCheckPermission(token, Arrays.asList(UserRole.ADMIN, UserRole.SOUL));
+        } catch (NonExistingEntityException | AuthException ex) {
+            return new ResponseEntity(ex.getMessage(), ex.getStatus());
+        }
+        return ResponseEntity.ok(lifeTicketService.getNotUsedLifeTicket(UUID.fromString(userDto.getRoleId())));
     }
 
     @PutMapping("/souls/{soulId}/life-tickets/{ticketId}")
@@ -66,7 +94,6 @@ public class SoulController {
             response = ResponseEntity.class)
     public ResponseEntity<HelpRequestDto> createHelpRequest(@RequestHeader("soul-token") String token) throws NonExistingEntityException {
         UserDto userDto;
-        SoulDto soulDto;
         try {
             userDto = loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.SOUL));
         } catch (AuthException ex) {
@@ -74,8 +101,7 @@ public class SoulController {
         }
         HelpRequestDto helpRequestDto;
         try {
-            soulDto = soulService.getSoulByUserId(UUID.fromString(userDto.getId()));
-            helpRequestDto = soulService.createNewHelpRequest(UUID.fromString(soulDto.getId()));
+            helpRequestDto = soulService.createNewHelpRequest(UUID.fromString(userDto.getRoleId()));
         } catch (NonExistingEntityException e) {
             return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (IllegalArgumentException e) {
@@ -90,18 +116,12 @@ public class SoulController {
             response = ResponseEntity.class)
     public ResponseEntity<List<HelpRequestDto>> getGodRequests(@RequestHeader("soul-token") String token) {
         UserDto userDto;
-        SoulDto soulDto;
         try {
             userDto = loginService.authoriseAndCheckPermission(token, Arrays.asList(UserRole.ADMIN, UserRole.SOUL));
-        } catch (AuthException ex) {
+        } catch (MainApiException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }
-        try {
-            soulDto = soulService.getSoulByUserId(UUID.fromString(userDto.getId()));
-        } catch (NonExistingEntityException e) {
-            return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
-        }
-        return ResponseEntity.ok(soulService.getHelpRequestsBySoulId(UUID.fromString(soulDto.getId())));
+        return ResponseEntity.ok(soulService.getHelpRequestsBySoulId(UUID.fromString(userDto.getRoleId())));
     }
 
     @GetMapping("/souls/personal-program")
@@ -112,19 +132,14 @@ public class SoulController {
             response = ResponseEntity.class)
     public ResponseEntity<PersonalProgramDto> getPersonalProgram(@RequestHeader("soul-token") String token) {
         UserDto userDto;
-        SoulDto soulDto;
         try {
             userDto = loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.SOUL));
-        } catch (AuthException ex) {
+        } catch (MainApiException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }
-        try {
-            soulDto = soulService.getSoulByUserId(UUID.fromString(userDto.getId()));
-        } catch (NonExistingEntityException e) {
-            return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
-        }
-        Optional<PersonalProgramDto> personalProgram = personalProgramService.getPersonalProgramBySoulId(UUID.fromString(soulDto.getId()));
+        Optional<PersonalProgramDto> personalProgram = personalProgramService.getPersonalProgramBySoulId(UUID.fromString(userDto.getRoleId()));
         return personalProgram.map(ResponseEntity::ok).orElseGet(() ->
-                ResponseEntity.ok(personalProgramService.createPersonalProgram(UUID.fromString(soulDto.getId()), numberOfExercisesInPersonalProgram)));
+                ResponseEntity.ok(personalProgramService.createPersonalProgram(UUID.fromString(userDto.getRoleId()), numberOfExercisesInPersonalProgram)));
     }
+
 }

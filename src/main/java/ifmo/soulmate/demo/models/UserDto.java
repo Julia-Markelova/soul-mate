@@ -6,8 +6,25 @@ public class UserDto {
     private String id;
     private UserRole role;
     private String login;
-
     private String token;
+    private String roleId;
+
+    public UserDto(String id, UserRole role, String login, String token, String roleId) {
+        this.id = id;
+        this.role = role;
+        this.login = login;
+        this.token = token;
+        this.roleId = roleId;
+    }
+
+
+    public String getRoleId() {
+        return roleId;
+    }
+
+    public void setRoleId(String roleId) {
+        this.roleId = roleId;
+    }
 
     public String getId() {
         return id;

@@ -1,7 +1,7 @@
 package ifmo.soulmate.demo.controllers;
 
 import ifmo.soulmate.demo.entities.enums.UserRole;
-import ifmo.soulmate.demo.exceptions.AuthException;
+import ifmo.soulmate.demo.exceptions.MainApiException;
 import ifmo.soulmate.demo.models.SoulDto;
 import ifmo.soulmate.demo.models.SystemModeDto;
 import ifmo.soulmate.demo.services.AdminService;
@@ -36,7 +36,7 @@ public class AdminController {
     public ResponseEntity<List<SoulDto>> getAllSouls(@RequestHeader("soul-token") String token) {
         try {
             loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.ADMIN));
-        } catch (AuthException ex) {
+        } catch (MainApiException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }
         return ResponseEntity.ok(soulService.getSouls());
@@ -49,7 +49,7 @@ public class AdminController {
     public ResponseEntity<List<SystemModeDto>> getAllModes(@RequestHeader("soul-token") String token) {
         try {
             loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.ADMIN));
-        } catch (AuthException ex) {
+        } catch (MainApiException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }
         return ResponseEntity.ok(adminService.getAllModes());
@@ -62,7 +62,7 @@ public class AdminController {
                                              @PathVariable UUID modeId, @RequestParam boolean isManualMode) {
         try {
             loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.ADMIN));
-        } catch (AuthException ex) {
+        } catch (MainApiException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }
         adminService.updateMode(modeId, isManualMode);

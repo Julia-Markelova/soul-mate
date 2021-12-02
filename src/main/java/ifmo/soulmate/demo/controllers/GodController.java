@@ -1,14 +1,17 @@
 package ifmo.soulmate.demo.controllers;
 
 import ifmo.soulmate.demo.entities.enums.HelpRequestStatus;
+import ifmo.soulmate.demo.entities.enums.SoulStatus;
 import ifmo.soulmate.demo.entities.enums.UserRole;
 import ifmo.soulmate.demo.exceptions.AuthException;
+import ifmo.soulmate.demo.exceptions.MainApiException;
 import ifmo.soulmate.demo.exceptions.NonExistingEntityException;
 import ifmo.soulmate.demo.models.GodDto;
 import ifmo.soulmate.demo.models.HelpRequestDto;
 import ifmo.soulmate.demo.models.UserDto;
 import ifmo.soulmate.demo.services.GodService;
 import ifmo.soulmate.demo.services.LoginService;
+import ifmo.soulmate.demo.services.SoulService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,6 +34,9 @@ public class GodController {
     @Autowired
     LoginService loginService;
 
+    @Autowired
+    SoulService soulService;
+
     @GetMapping("/gods/profile")
     @ApiOperation(value = "Получить информацию о боге",
             notes = "Для запроса нужно быть авторизованным админом/богом",
@@ -39,7 +45,7 @@ public class GodController {
         UserDto userDto;
         try {
             userDto = loginService.authoriseAndCheckPermission(token, Arrays.asList(UserRole.ADMIN, UserRole.GOD));
-        } catch (AuthException ex) {
+        } catch (MainApiException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }
         try {
@@ -57,16 +63,10 @@ public class GodController {
         UserDto userDto;
         try {
             userDto = loginService.authoriseAndCheckPermission(token, Arrays.asList(UserRole.ADMIN, UserRole.GOD));
-        } catch (AuthException ex) {
+        } catch (MainApiException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }
-        GodDto godDto;
-        try {
-            godDto = godService.getGodByUserId((UUID.fromString(userDto.getId())));
-        } catch (NonExistingEntityException e) {
-            return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
-        }
-        return ResponseEntity.ok(godService.getNewHelpRequests(UUID.fromString(godDto.getId())));
+        return ResponseEntity.ok(godService.getNewHelpRequests(UUID.fromString(userDto.getRoleId())));
     }
 
     @PutMapping("/gods/accept-request/{requestId}")
@@ -76,15 +76,13 @@ public class GodController {
     public ResponseEntity<HelpRequestDto> acceptRequest(@RequestHeader("soul-token") String token, @PathVariable String requestId) {
         HelpRequestDto helpRequestDto;
         UserDto userDto;
-        GodDto godDto;
         try {
             userDto =loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.GOD));
-        } catch (AuthException ex) {
+        } catch (MainApiException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }
         try {
-            godDto = godService.getGodByUserId(UUID.fromString(userDto.getId()));
-            helpRequestDto = godService.updateStatusForRequest(UUID.fromString(godDto.getId()), UUID.fromString(requestId), HelpRequestStatus.ACCEPTED);
+            helpRequestDto = godService.updateStatusForRequest(UUID.fromString(userDto.getRoleId()), UUID.fromString(requestId), HelpRequestStatus.ACCEPTED);
         } catch (NonExistingEntityException e) {
             return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (IllegalArgumentException e) {
@@ -95,20 +93,19 @@ public class GodController {
 
     @PutMapping("/gods/finish-request/{requestId}")
     @ApiOperation(value = "Завершить заявку о помощи",
-            notes = "Для запроса нужно быть авторизованным богом",
+            notes = "Проставляет душе статус DEAD. Для запроса нужно быть авторизованным богом",
             response = ResponseEntity.class)
     public ResponseEntity<HelpRequestDto> finishRequest(@RequestHeader("soul-token") String token, @PathVariable String requestId) {
         HelpRequestDto helpRequestDto;
         UserDto userDto;
-        GodDto godDto;
         try {
             userDto = loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.GOD));
-        } catch (AuthException ex) {
+        } catch (MainApiException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }
         try {
-            godDto = godService.getGodByUserId(UUID.fromString(userDto.getId()));
-            helpRequestDto = godService.updateStatusForRequest(UUID.fromString(godDto.getId()), UUID.fromString(requestId), HelpRequestStatus.FINISHED);
+            helpRequestDto = godService.updateStatusForRequest(UUID.fromString(userDto.getRoleId()), UUID.fromString(requestId), HelpRequestStatus.FINISHED);
+            soulService.updateSoulStatus(UUID.fromString(helpRequestDto.getCreatedBy()), SoulStatus.DEAD);
         } catch (NonExistingEntityException e) {
             return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (IllegalArgumentException e) {
@@ -123,17 +120,11 @@ public class GodController {
             response = ResponseEntity.class)
     public ResponseEntity<List<HelpRequestDto>> getGodRequests(@RequestHeader("soul-token") String token) {
         UserDto userDto;
-        GodDto godDto;
         try {
             userDto = loginService.authoriseAndCheckPermission(token, Arrays.asList(UserRole.ADMIN, UserRole.GOD));
-        } catch (AuthException ex) {
+        } catch (MainApiException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }
-        try {
-            godDto = godService.getGodByUserId((UUID.fromString(userDto.getId())));
-        } catch (NonExistingEntityException e) {
-            return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
-        }
-        return ResponseEntity.ok(godService.getHelpRequestsByGodId(UUID.fromString(godDto.getId())));
+        return ResponseEntity.ok(godService.getHelpRequestsByGodId(UUID.fromString(userDto.getRoleId())));
     }
 }
