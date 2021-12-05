@@ -159,27 +159,40 @@ users.append({
     'role': 'ADMIN',
 })
 
-for soul in souls[:life_souls]:
-    count_of_lifes = random.randint(1, 3)
-    for i in range(count_of_lifes):
-        is_men = random.choice([True, False])
-        born_years_ago = random.randint(10, 120)
+
+def create_life(soul_id: str, is_alive: bool):
+    is_men = random.choice([True, False])
+    if is_alive:
+        born_years_ago = random.randint(10, 80)
         date_of_birth = datetime.datetime.now() - datetime.timedelta(days=365 * born_years_ago)
         date_of_death = None
-        is_dead = random.choice([True, False])
-        if is_dead:
-            age = random.randint(10, born_years_ago)
-            date_of_death = date_of_birth + datetime.timedelta(days=365 * age)
+    else:
+        born_years_ago = random.randint(100, 120)
+        date_of_birth = datetime.datetime.now() - datetime.timedelta(days=365 * born_years_ago)
+        age = random.randint(10, 110)
+        date_of_death = date_of_birth + datetime.timedelta(days=365 * age)
 
-        lifes.append({
-            'id': str(uuid4()),
-            'soul_id': soul['id'],
-            'karma': random.randint(0, 100),
-            'soul_name': random.choice(men_names) if is_men else random.choice(women_names),
-            'soul_surname': random.choice(surnames) if is_men else f'{random.choice(surnames)}a',
-            'date_of_birth': date_of_birth,
-            'date_of_death': date_of_death,
-        })
+    return {
+        'id': str(uuid4()),
+        'soul_id': soul_id,
+        'karma': random.randint(0, 100),
+        'soul_name': random.choice(men_names) if is_men else random.choice(women_names),
+        'soul_surname': random.choice(surnames) if is_men else f'{random.choice(surnames)}a',
+        'date_of_birth': date_of_birth,
+        'date_of_death': date_of_death,
+    }
+
+
+soul_id_to_life = {life['soul_id']: life for life in lifes}
+
+for soul in souls:
+    if soul['status'] == 'BORN':
+        if soul_id_to_life.get(soul['id'], None) is None:
+            lifes.append(create_life(soul['id'], True))
+    elif soul['status'] == 'UNBORN':
+        continue
+    else:
+        lifes.append(create_life(soul['id'], False))
 
 dead_souls = [soul for soul in lifes if soul['date_of_death'] is not None]
 alive_souls = [soul for soul in lifes if soul['date_of_death'] is None]
