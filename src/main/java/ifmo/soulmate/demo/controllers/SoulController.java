@@ -7,14 +7,20 @@ import ifmo.soulmate.demo.exceptions.AuthException;
 import ifmo.soulmate.demo.exceptions.MainApiException;
 import ifmo.soulmate.demo.exceptions.NonExistingEntityException;
 import ifmo.soulmate.demo.models.*;
-import ifmo.soulmate.demo.services.*;
+import ifmo.soulmate.demo.services.LifeTicketService;
+import ifmo.soulmate.demo.services.LoginService;
+import ifmo.soulmate.demo.services.PersonalProgramService;
+import ifmo.soulmate.demo.services.SoulService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
@@ -79,6 +85,9 @@ public class SoulController {
     }
 
     @PutMapping("/souls/receive-life-ticket/{ticketId}")
+    @ApiOperation(value = "Использовать билет в жизнь. Доступно только для душ UNBORN. Проставляет статус BORN",
+            notes = "Для запроса нужно быть авторизованной душой. Создает для нерожденной души новую жизнь",
+            response = ResponseEntity.class)
     public ResponseEntity receiveLifeTicket(@RequestHeader("soul-token") String token, @PathVariable String ticketId) {
         UserDto userDto;
         try {
@@ -86,8 +95,12 @@ public class SoulController {
         } catch (NonExistingEntityException | AuthException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }
-        lifeTicketService.receiveLifeTicket(UUID.fromString(userDto.getRoleId()), UUID.fromString(ticketId));
-        return ResponseEntity.ok().build();
+        try {
+            lifeTicketService.receiveLifeTicket(UUID.fromString(userDto.getRoleId()), UUID.fromString(ticketId));
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException ex) {
+            return new ResponseEntity(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PutMapping("/souls/update/status/{status}")

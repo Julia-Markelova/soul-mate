@@ -1,9 +1,16 @@
 package ifmo.soulmate.demo.services;
 
+import ifmo.soulmate.demo.entities.Life;
 import ifmo.soulmate.demo.entities.LifeSpark;
 import ifmo.soulmate.demo.entities.LifeTicket;
+import ifmo.soulmate.demo.entities.Soul;
+import ifmo.soulmate.demo.entities.enums.SoulStatus;
 import ifmo.soulmate.demo.repositories.ILIfeTicketRepository;
 import ifmo.soulmate.demo.repositories.ILifeSparkRepository;
+import ifmo.soulmate.demo.repositories.ILifesRepository;
+import ifmo.soulmate.demo.repositories.SoulRepository;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +28,11 @@ public class LifeTicketService {
     ILifeSparkRepository lifeSparkRepository;
     @Autowired
     ILIfeTicketRepository lifeTicketRepository;
+    @Autowired
+    SoulRepository soulRepository;
+    @Autowired
+    ILifesRepository lifesRepository;
+    private static final Logger log = LogManager.getLogger(LifeTicketService.class);
 
     public List<LifeSpark> getSparksWithoutTickets() {
         List<LifeSpark> allSparks = lifeSparkRepository.findAll();
@@ -50,8 +62,26 @@ public class LifeTicketService {
     }
 
     public void receiveLifeTicket(UUID soulId, UUID ticketId) {
-        LifeTicket ticket = getNotUsedLifeTicket(soulId);
-        ticket.setReceiveDate(Date.from(Instant.now()));
-        lifeTicketRepository.saveAndFlush(ticket);
+        Optional<Soul> soul = soulRepository.findById(soulId);
+        if (soul.isPresent()) {
+            if (soul.get().getStatus() == SoulStatus.UNBORN) {
+                LifeTicket ticket = getNotUsedLifeTicket(soulId);
+                ticket.setReceiveDate(Date.from(Instant.now()));
+                lifeTicketRepository.saveAndFlush(ticket);
+                soul.get().setStatus(SoulStatus.BORN);
+                Life life = new Life(
+                        UUID.randomUUID(),
+                        soulId,
+                        new Date(),
+                        null,
+                        "soulName",
+                        "soulSurname",
+                        0
+                );
+                lifesRepository.saveAndFlush(life);
+            } else {
+                throw new IllegalArgumentException(String.format("Expected soul with status UNBORN but got %s", soul.get().getStatus()));
+            }
+        }
     }
 }
