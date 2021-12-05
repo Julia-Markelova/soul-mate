@@ -134,6 +134,11 @@ public class SoulService {
         Optional<Soul> soul = soulRepository.findById(soulId);
         if (soul.isPresent()) {
             Soul unwrapped = soul.get();
+            if (unwrapped.getStatus() != SoulStatus.DEAD) {
+                String msg = (String.format("Only DEAD souls can be mentors. Soul %s has status %s", soulId.toString(), unwrapped.getStatus()));
+                log.warn(msg);
+                throw new IllegalArgumentException(msg);
+            }
             if (unwrapped.getIsMentor() != isMentor) {
                 unwrapped.setIsMentor(isMentor);
                 soulRepository.saveAndFlush(unwrapped);
@@ -142,6 +147,7 @@ public class SoulService {
                 Optional<User> user = userRepository.findById(unwrapped.getUserId());
                 if (user.isPresent()) {
                     user.get().setRole(role);
+                    userRepository.saveAndFlush(user.get());
                 }
             }
             return new SoulDto(unwrapped.getId().toString(), unwrapped.getStatus(), "", unwrapped.getIsMentor());

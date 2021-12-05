@@ -18,10 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
@@ -124,10 +121,12 @@ public class SoulController {
         UserDto userDto;
         SoulDto soulDto;
         try {
-            userDto = loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.SOUL));
+            userDto = loginService.authoriseAndCheckPermission(token, Arrays.asList(UserRole.SOUL, UserRole.MENTOR));
             soulDto = soulService.updateSoulMentor(UUID.fromString(userDto.getRoleId()), isMentor);
         } catch (NonExistingEntityException | AuthException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
+        } catch (IllegalArgumentException ex) {
+            return new ResponseEntity(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
         return ResponseEntity.ok(soulDto);
     }
