@@ -48,7 +48,7 @@ public class SoulController {
     public ResponseEntity<SoulDto> getSoulProfile(@RequestHeader("soul-token") String token) {
         UserDto userDto;
         try {
-            userDto = loginService.authoriseAndCheckPermission(token, Arrays.asList(UserRole.ADMIN, UserRole.SOUL));
+            userDto = loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.SOUL));
         } catch (MainApiException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }
@@ -63,7 +63,7 @@ public class SoulController {
     public ResponseEntity<LifeTicket> getLifeTicket(@RequestHeader("soul-token") String token) {
         UserDto userDto;
         try {
-            userDto = loginService.authoriseAndCheckPermission(token, Arrays.asList(UserRole.ADMIN, UserRole.SOUL));
+            userDto = loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.SOUL));
         } catch (NonExistingEntityException | AuthException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }
@@ -74,7 +74,7 @@ public class SoulController {
     public ResponseEntity receiveLifeTicket(@RequestHeader("soul-token") String token, @PathVariable String ticketId) {
         UserDto userDto;
         try {
-            userDto = loginService.authoriseAndCheckPermission(token, Arrays.asList(UserRole.ADMIN, UserRole.SOUL));
+            userDto = loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.SOUL));
         } catch (NonExistingEntityException | AuthException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }
@@ -87,7 +87,7 @@ public class SoulController {
         UserDto userDto;
         SoulDto soulDto;
         try {
-            userDto = loginService.authoriseAndCheckPermission(token, Arrays.asList(UserRole.ADMIN, UserRole.SOUL));
+            userDto = loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.SOUL));
             soulDto = soulService.updateSoulStatus(UUID.fromString(userDto.getRoleId()), SoulStatus.valueOf(status));
         } catch (NonExistingEntityException | AuthException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
@@ -100,7 +100,7 @@ public class SoulController {
         UserDto userDto;
         SoulDto soulDto;
         try {
-            userDto = loginService.authoriseAndCheckPermission(token, Arrays.asList(UserRole.ADMIN, UserRole.SOUL));
+            userDto = loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.SOUL));
             soulDto = soulService.updateSoulMentor(UUID.fromString(userDto.getRoleId()), isMentor);
         } catch (NonExistingEntityException | AuthException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
@@ -137,7 +137,7 @@ public class SoulController {
     public ResponseEntity<List<HelpRequestDto>> getGodRequests(@RequestHeader("soul-token") String token) {
         UserDto userDto;
         try {
-            userDto = loginService.authoriseAndCheckPermission(token, Arrays.asList(UserRole.ADMIN, UserRole.SOUL));
+            userDto = loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.SOUL));
         } catch (MainApiException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }
@@ -175,7 +175,7 @@ public class SoulController {
                                                                      @RequestParam Integer progress) {
         UserDto userDto;
         try {
-            userDto = loginService.authoriseAndCheckPermission(token, Arrays.asList(UserRole.ADMIN, UserRole.SOUL));
+            userDto = loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.SOUL));
         } catch (NonExistingEntityException | AuthException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }
