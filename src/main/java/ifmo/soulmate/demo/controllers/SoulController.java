@@ -1,6 +1,7 @@
 package ifmo.soulmate.demo.controllers;
 
 import ifmo.soulmate.demo.entities.LifeTicket;
+import ifmo.soulmate.demo.entities.enums.HelpRequestType;
 import ifmo.soulmate.demo.entities.enums.SoulStatus;
 import ifmo.soulmate.demo.entities.enums.UserRole;
 import ifmo.soulmate.demo.exceptions.AuthException;
@@ -144,7 +145,7 @@ public class SoulController {
         }
         HelpRequestDto helpRequestDto;
         try {
-            helpRequestDto = soulService.createNewHelpRequest(UUID.fromString(userDto.getRoleId()));
+            helpRequestDto = soulService.createNewHelpRequestForGod(UUID.fromString(userDto.getRoleId()));
         } catch (NonExistingEntityException e) {
             return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (IllegalArgumentException e) {
@@ -153,7 +154,7 @@ public class SoulController {
         return ResponseEntity.ok(helpRequestDto);
     }
 
-    @GetMapping("/souls/my-requests")
+    @GetMapping("/souls/my-requests/astral")
     @ApiOperation(value = "Получить список запросов на выход из астрала, которые созданы душой",
             notes = "Для запроса нужно быть авторизованной душой",
             response = ResponseEntity.class)
@@ -164,7 +165,7 @@ public class SoulController {
         } catch (MainApiException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }
-        return ResponseEntity.ok(soulService.getHelpRequestsBySoulId(UUID.fromString(userDto.getRoleId())));
+        return ResponseEntity.ok(soulService.getHelpRequestsBySoulId(UUID.fromString(userDto.getRoleId()), HelpRequestType.GOD));
     }
 
     @GetMapping("/souls/personal-program")

@@ -87,4 +87,15 @@ public class LifeTicketService {
             }
         }
     }
+
+    public void createLifeSpark(UUID soulId, UUID mentorId) {
+        LifeSpark lifeSpark = new LifeSpark(
+                UUID.randomUUID(),
+                null,
+                soulId,
+                mentorId,
+                null
+        );
+        lifeSparkRepository.saveAndFlush(lifeSpark);
+    }
 }

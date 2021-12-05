@@ -1,6 +1,7 @@
 package ifmo.soulmate.demo.entities;
 
 import ifmo.soulmate.demo.entities.enums.HelpRequestStatus;
+import ifmo.soulmate.demo.entities.enums.HelpRequestType;
 
 import javax.persistence.*;
 import java.util.UUID;
@@ -17,6 +18,10 @@ public class HelpRequest {
     @Enumerated(EnumType.STRING)
     private HelpRequestStatus status;
 
+    @Column(name = "type")
+    @Enumerated(EnumType.STRING)
+    private HelpRequestType type;
+
     @Column(name = "created_by")
     private UUID createdBy;
 
@@ -26,17 +31,19 @@ public class HelpRequest {
     public HelpRequest() {
     }
 
-    public HelpRequest(UUID id, HelpRequestStatus status, UUID createdBy) {
+    public HelpRequest(UUID id, HelpRequestStatus status, UUID createdBy, HelpRequestType type) {
         this.id = id;
         this.status = status;
         this.createdBy = createdBy;
+        this.type = type;
     }
 
-    public HelpRequest(UUID id, HelpRequestStatus status, UUID createdBy, UUID acceptedBy) {
+    public HelpRequest(UUID id, HelpRequestStatus status, UUID createdBy, UUID acceptedBy, HelpRequestType type) {
         this.id = id;
         this.status = status;
         this.createdBy = createdBy;
         this.acceptedBy = acceptedBy;
+        this.type = type;
     }
 
     public UUID getId() {
@@ -69,5 +76,13 @@ public class HelpRequest {
 
     public void setAcceptedBy(UUID acceptedBy) {
         this.acceptedBy = acceptedBy;
+    }
+
+    public HelpRequestType getType() {
+        return type;
+    }
+
+    public void setType(HelpRequestType type) {
+        this.type = type;
     }
 }

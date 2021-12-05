@@ -1,10 +1,10 @@
 package ifmo.soulmate.demo.services;
 
 
-import ifmo.soulmate.demo.controllers.LoginController;
 import ifmo.soulmate.demo.entities.God;
 import ifmo.soulmate.demo.entities.HelpRequest;
 import ifmo.soulmate.demo.entities.enums.HelpRequestStatus;
+import ifmo.soulmate.demo.entities.enums.HelpRequestType;
 import ifmo.soulmate.demo.exceptions.NonExistingEntityException;
 import ifmo.soulmate.demo.models.GodDto;
 import ifmo.soulmate.demo.models.HelpRequestDto;
@@ -57,7 +57,7 @@ public class GodService {
     }
 
     public List<HelpRequestDto> getOpenHelpRequests(UUID godId) {
-        List<HelpRequest> newRequests = helpRequestRepository.getByStatus(HelpRequestStatus.NEW);
+        List<HelpRequest> newRequests = helpRequestRepository.getByStatusAndType(HelpRequestStatus.NEW, HelpRequestType.GOD);
         List<HelpRequest> acceptedRequests = helpRequestRepository.getByAcceptedByAndStatus(godId, HelpRequestStatus.ACCEPTED);
         List<HelpRequest> openRequests = Stream.concat(newRequests.stream(), acceptedRequests.stream())
                 .collect(Collectors.toList());

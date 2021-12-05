@@ -5,6 +5,7 @@ import ifmo.soulmate.demo.entities.Life;
 import ifmo.soulmate.demo.entities.Message;
 import ifmo.soulmate.demo.entities.Soul;
 import ifmo.soulmate.demo.entities.enums.HelpRequestStatus;
+import ifmo.soulmate.demo.entities.enums.HelpRequestType;
 import ifmo.soulmate.demo.entities.enums.MessageStatus;
 import ifmo.soulmate.demo.entities.enums.SoulStatus;
 import ifmo.soulmate.demo.exceptions.NonExistingEntityException;
@@ -149,19 +150,19 @@ public class SoulService {
         throw new NonExistingEntityException(msg);
     }
 
-    public HelpRequestDto createNewHelpRequest(UUID soulId) throws NonExistingEntityException {
+    public HelpRequestDto createNewHelpRequestForGod(UUID soulId) throws NonExistingEntityException {
         Optional<Soul> soul = soulRepository.findById(soulId);
         if (soul.isPresent()) {
             Soul unwrapped = soul.get();
             if (unwrapped.getStatus() == SoulStatus.LOST) {
-                List<HelpRequest> newHelpRequests = helpRequestRepository.getByCreatedByAndStatus(soulId, HelpRequestStatus.NEW);
-                List<HelpRequest> acceptedHelpRequests = helpRequestRepository.getByCreatedByAndStatus(soulId, HelpRequestStatus.ACCEPTED);
+                List<HelpRequest> newHelpRequests = helpRequestRepository.getByCreatedByAndStatusAndType(soulId, HelpRequestStatus.NEW, HelpRequestType.GOD);
+                List<HelpRequest> acceptedHelpRequests = helpRequestRepository.getByCreatedByAndStatusAndType(soulId, HelpRequestStatus.ACCEPTED, HelpRequestType.GOD);
                 if (newHelpRequests.size() > 0 || acceptedHelpRequests.size() > 0) {
                     String msg = (String.format("Soul %s has already opened requests", soulId.toString()));
                     log.warn(msg);
                     throw new IllegalArgumentException(msg);
                 }
-                HelpRequest helpRequest = new HelpRequest(UUID.randomUUID(), HelpRequestStatus.NEW, soulId);
+                HelpRequest helpRequest = new HelpRequest(UUID.randomUUID(), HelpRequestStatus.NEW, soulId, HelpRequestType.GOD);
                 helpRequestRepository.saveAndFlush(helpRequest);
                 return new HelpRequestDto(helpRequest.getId().toString(), helpRequest.getCreatedBy().toString(), helpRequest.getStatus());
             } else {
@@ -176,8 +177,8 @@ public class SoulService {
         }
     }
 
-    public List<HelpRequestDto> getHelpRequestsBySoulId(UUID soulId) {
-        List<HelpRequest> requests = helpRequestRepository.getByCreatedBy(soulId);
+    public List<HelpRequestDto> getHelpRequestsBySoulId(UUID soulId, HelpRequestType type) {
+        List<HelpRequest> requests = helpRequestRepository.getByCreatedByAndType(soulId, type);
         log.info("Get all requests for soul {}", soulId);
         return requests
                 .stream()
