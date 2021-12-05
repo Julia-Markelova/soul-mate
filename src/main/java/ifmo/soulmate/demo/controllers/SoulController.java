@@ -155,15 +155,20 @@ public class SoulController {
     @GetMapping("/souls/personal-program")
     @ApiOperation(value = "Получить информацию о персональной программе. " +
             "Если программы еще нет, то она будет создана автоматически.",
-            notes = "Для запроса нужно быть авторизованной душой. Количество упражнений в каждой программе фиксированно." +
+            notes = "Для запроса нужно быть авторизованной душой со статусом UNBORN. Количество упражнений в каждой программе фиксированно." +
                     "Задается в контроллеле души. По умолчанию 5.",
             response = ResponseEntity.class)
     public ResponseEntity<PersonalProgramDto> getPersonalProgram(@RequestHeader("soul-token") String token) {
         UserDto userDto;
+        SoulDto soulDto;
         try {
             userDto = loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.SOUL));
+            soulDto = soulService.getSoulByUserId(UUID.fromString(userDto.getId()));
         } catch (MainApiException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
+        }
+        if (soulDto.getStatus() != SoulStatus.UNBORN) {
+            return new ResponseEntity(String.format("Expected soul with status UNBORN but got %s", soulDto.getStatus()), HttpStatus.BAD_REQUEST);
         }
         Optional<PersonalProgramDto> personalProgram = personalProgramService.getPersonalProgramBySoulId(UUID.fromString(userDto.getRoleId()));
         return personalProgram.map(ResponseEntity::ok).orElseGet(() ->
