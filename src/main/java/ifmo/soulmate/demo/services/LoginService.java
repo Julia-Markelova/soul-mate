@@ -33,7 +33,7 @@ public class LoginService {
     private GodRepository godRepository;
     @Autowired
     private SoulRepository soulRepository;
-    private static final Logger log = LogManager.getLogger(LoginController.class);
+    private static final Logger log = LogManager.getLogger(LoginService.class);
 
     private final String jwtSecret = "top-secret-string";
 

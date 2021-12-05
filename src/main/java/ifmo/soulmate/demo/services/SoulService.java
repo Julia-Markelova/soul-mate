@@ -30,7 +30,7 @@ public class SoulService {
     @Autowired
     HelpRequestRepository helpRequestRepository;
 
-    private static final Logger log = LogManager.getLogger(LoginController.class);
+    private static final Logger log = LogManager.getLogger(SoulService.class);
 
     private final Random random = new Random();
 

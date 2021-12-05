@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 public class AdminService {
     @Autowired
     private SystemModeRepository systemModeRepository;
-    private static final Logger log = LogManager.getLogger(LoginController.class);
+    private static final Logger log = LogManager.getLogger(AdminService.class);
 
     public List<SystemModeDto> getAllModes() {
         log.info("Get all modes");

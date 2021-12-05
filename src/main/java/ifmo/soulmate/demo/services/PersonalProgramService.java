@@ -32,7 +32,7 @@ public class PersonalProgramService {
     @Autowired
     ILifeSparkRepository lifeSparkRepository;
 
-    private static final Logger log = LogManager.getLogger(LoginController.class);
+    private static final Logger log = LogManager.getLogger(PersonalProgramService.class);
 
     public Optional<PersonalProgramDto> getPersonalProgramBySoulId(UUID soulId) {
         Optional<PersonalProgram> personalProgram = personalProgramRepository.findPersonalProgramBySoulId(soulId);

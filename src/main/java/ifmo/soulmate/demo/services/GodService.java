@@ -30,7 +30,7 @@ public class GodService {
     @Autowired
     private HelpRequestRepository helpRequestRepository;
 
-    private static final Logger log = LogManager.getLogger(LoginController.class);
+    private static final Logger log = LogManager.getLogger(GodService.class);
 
     public GodDto getGodById(UUID godId) throws NonExistingEntityException {
         Optional<God> god = godRepository.findById(godId);
