@@ -76,7 +76,6 @@ public class RelativeService {
                 unwrapped.getSoulId().toString(),
                 unwrapped.getSoulName(),
                 unwrapped.getSoulSurname(),
-                unwrapped.getKarma(),
                 unwrapped.getDateOfBirth(),
                 unwrapped.getDateOfDeath()
         );

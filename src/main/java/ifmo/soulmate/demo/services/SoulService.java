@@ -214,7 +214,6 @@ public class SoulService {
                                 x.getSoulId().toString(),
                                 x.getSoulName(),
                                 x.getSoulSurname(),
-                                x.getKarma(),
                                 x.getDateOfBirth(),
                                 x.getDateOfDeath()
                         );

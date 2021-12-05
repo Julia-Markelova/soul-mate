@@ -15,19 +15,17 @@ public class LifeDto {
     String soulId;
     String name;
     String surname;
-    int karma;
     Date dateOfBirth;
     Date dateOfDeath;
 
     public LifeDto() {
     }
 
-    public LifeDto(String id, String soulId, String name, String surname, int karma, Date dateOfBirth, Date dateOfDeath) {
+    public LifeDto(String id, String soulId, String name, String surname, Date dateOfBirth, Date dateOfDeath) {
         this.id = id;
         this.soulId = soulId;
         this.name = name;
         this.surname = surname;
-        this.karma = karma;
         this.dateOfBirth = dateOfBirth;
         this.dateOfDeath = dateOfDeath;
     }
@@ -54,14 +52,6 @@ public class LifeDto {
 
     public void setSurname(String surname) {
         this.surname = surname;
-    }
-
-    public int getKarma() {
-        return karma;
-    }
-
-    public void setKarma(int karma) {
-        this.karma = karma;
     }
 
     public Date getDateOfBirth() {
