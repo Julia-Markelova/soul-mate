@@ -132,11 +132,11 @@ public class SoulController {
         return ResponseEntity.ok(soulDto);
     }
 
-    @PostMapping("/souls/create-help-request")
+    @PostMapping("/souls/create-help-request/astral")
     @ApiOperation(value = "Создает заявку на выход из астрала",
             notes = "Для запроса нужно быть авторизованной душой",
             response = ResponseEntity.class)
-    public ResponseEntity<HelpRequestDto> createHelpRequest(@RequestHeader("soul-token") String token) throws NonExistingEntityException {
+    public ResponseEntity<HelpRequestDto> createHelpRequestAstral(@RequestHeader("soul-token") String token) throws NonExistingEntityException {
         UserDto userDto;
         try {
             userDto = loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.SOUL));
@@ -221,4 +221,43 @@ public class SoulController {
         programDto = personalProgramService.getPersonalProgramBySoulId(UUID.fromString(userDto.getRoleId()));
         return programDto.map(ResponseEntity::ok).orElseGet(() -> new ResponseEntity("No personal program found", HttpStatus.NOT_FOUND));
     }
+
+
+    @PostMapping("/souls/create-help-request/life-spark")
+    @ApiOperation(value = "Создает заявку на поиск искры жизни",
+            notes = "Для запроса нужно быть авторизованной душой",
+            response = ResponseEntity.class)
+    public ResponseEntity<HelpRequestDto> createHelpRequestLifeSpark(@RequestHeader("soul-token") String token) throws NonExistingEntityException {
+        UserDto userDto;
+        try {
+            userDto = loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.SOUL));
+        } catch (AuthException ex) {
+            return new ResponseEntity(ex.getMessage(), ex.getStatus());
+        }
+        HelpRequestDto helpRequestDto;
+        try {
+            helpRequestDto = soulService.createNewHelpRequestForMentor(UUID.fromString(userDto.getRoleId()));
+        } catch (NonExistingEntityException e) {
+            return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+        return ResponseEntity.ok(helpRequestDto);
+    }
+
+    @GetMapping("/souls/my-requests/life-spark")
+    @ApiOperation(value = "Получить список запросов на поиск искры жизни, которые созданы душой",
+            notes = "Для запроса нужно быть авторизованной душой",
+            response = ResponseEntity.class)
+    public ResponseEntity<List<HelpRequestDto>> getLifeSparkRequests(@RequestHeader("soul-token") String token) {
+        UserDto userDto;
+        try {
+            userDto = loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.SOUL));
+        } catch (MainApiException ex) {
+            return new ResponseEntity(ex.getMessage(), ex.getStatus());
+        }
+        return ResponseEntity.ok(soulService.getHelpRequestsBySoulId(UUID.fromString(userDto.getRoleId()), HelpRequestType.MENTOR));
+    }
+
+
 }

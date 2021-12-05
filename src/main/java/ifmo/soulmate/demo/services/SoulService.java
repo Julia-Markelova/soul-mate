@@ -158,7 +158,7 @@ public class SoulService {
                 List<HelpRequest> newHelpRequests = helpRequestRepository.getByCreatedByAndStatusAndType(soulId, HelpRequestStatus.NEW, HelpRequestType.GOD);
                 List<HelpRequest> acceptedHelpRequests = helpRequestRepository.getByCreatedByAndStatusAndType(soulId, HelpRequestStatus.ACCEPTED, HelpRequestType.GOD);
                 if (newHelpRequests.size() > 0 || acceptedHelpRequests.size() > 0) {
-                    String msg = (String.format("Soul %s has already opened requests", soulId.toString()));
+                    String msg = (String.format("Soul %s has already opened requests for astral", soulId.toString()));
                     log.warn(msg);
                     throw new IllegalArgumentException(msg);
                 }
@@ -167,6 +167,33 @@ public class SoulService {
                 return new HelpRequestDto(helpRequest.getId().toString(), helpRequest.getCreatedBy().toString(), helpRequest.getStatus());
             } else {
                 String msg = (String.format("Soul %s is not LOST", soulId.toString()));
+                log.warn(msg);
+                throw new IllegalArgumentException(msg);
+            }
+        } else {
+            String msg = (String.format("No soul found with id: %s", soulId.toString()));
+            log.warn(msg);
+            throw new NonExistingEntityException(msg);
+        }
+    }
+
+    public HelpRequestDto createNewHelpRequestForMentor(UUID soulId) throws NonExistingEntityException {
+        Optional<Soul> soul = soulRepository.findById(soulId);
+        if (soul.isPresent()) {
+            Soul unwrapped = soul.get();
+            if (unwrapped.getStatus() == SoulStatus.UNBORN) {
+                List<HelpRequest> newHelpRequests = helpRequestRepository.getByCreatedByAndStatusAndType(soulId, HelpRequestStatus.NEW, HelpRequestType.MENTOR);
+                List<HelpRequest> acceptedHelpRequests = helpRequestRepository.getByCreatedByAndStatusAndType(soulId, HelpRequestStatus.ACCEPTED, HelpRequestType.MENTOR);
+                if (newHelpRequests.size() > 0 || acceptedHelpRequests.size() > 0) {
+                    String msg = (String.format("Soul %s has already opened requests for life sparks", soulId.toString()));
+                    log.warn(msg);
+                    throw new IllegalArgumentException(msg);
+                }
+                HelpRequest helpRequest = new HelpRequest(UUID.randomUUID(), HelpRequestStatus.NEW, soulId, HelpRequestType.MENTOR);
+                helpRequestRepository.saveAndFlush(helpRequest);
+                return new HelpRequestDto(helpRequest.getId().toString(), helpRequest.getCreatedBy().toString(), helpRequest.getStatus());
+            } else {
+                String msg = (String.format("Soul %s is not UNBORN", soulId.toString()));
                 log.warn(msg);
                 throw new IllegalArgumentException(msg);
             }
