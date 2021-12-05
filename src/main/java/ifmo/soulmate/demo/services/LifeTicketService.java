@@ -79,8 +79,11 @@ public class LifeTicketService {
                         0
                 );
                 lifesRepository.saveAndFlush(life);
+                log.info("Soul {} received lifeTicket and turned BORN. New Life {} created", soulId.toString(), life.getId());
             } else {
-                throw new IllegalArgumentException(String.format("Expected soul with status UNBORN but got %s", soul.get().getStatus()));
+                String msg = String.format("Expected soul with status UNBORN but got %s", soul.get().getStatus());
+                log.warn(msg);
+                throw new IllegalArgumentException(msg);
             }
         }
     }

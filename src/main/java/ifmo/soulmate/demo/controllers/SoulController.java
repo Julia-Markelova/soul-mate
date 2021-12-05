@@ -88,7 +88,7 @@ public class SoulController {
     @ApiOperation(value = "Использовать билет в жизнь. Доступно только для душ UNBORN. Проставляет статус BORN",
             notes = "Для запроса нужно быть авторизованной душой. Создает для нерожденной души новую жизнь",
             response = ResponseEntity.class)
-    public ResponseEntity receiveLifeTicket(@RequestHeader("soul-token") String token, @PathVariable String ticketId) {
+    public ResponseEntity<SoulDto> receiveLifeTicket(@RequestHeader("soul-token") String token, @PathVariable String ticketId) {
         UserDto userDto;
         try {
             userDto = loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.SOUL));
@@ -97,9 +97,11 @@ public class SoulController {
         }
         try {
             lifeTicketService.receiveLifeTicket(UUID.fromString(userDto.getRoleId()), UUID.fromString(ticketId));
-            return ResponseEntity.ok().build();
+            return ResponseEntity.ok(soulService.getSoulByUserId(UUID.fromString(userDto.getRoleId())));
         } catch (IllegalArgumentException ex) {
             return new ResponseEntity(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        } catch (MainApiException ex) {
+            return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }
     }
 
