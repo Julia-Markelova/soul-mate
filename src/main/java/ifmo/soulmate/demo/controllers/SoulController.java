@@ -140,7 +140,7 @@ public class SoulController {
 
     @GetMapping("/souls/my-requests")
     @ApiOperation(value = "Получить список запросов на выход из астрала, которые созданы душой",
-            notes = "Для запроса нужно быть авторизованным админом/душой",
+            notes = "Для запроса нужно быть авторизованной душой",
             response = ResponseEntity.class)
     public ResponseEntity<List<HelpRequestDto>> getGodRequests(@RequestHeader("soul-token") String token) {
         UserDto userDto;
@@ -176,7 +176,7 @@ public class SoulController {
                     "в переданное значение. Значение должно быть в диапазоне [0, 100]. " +
                     "Если после обновления прогресса все упражнения будут завершены, то у программы " +
                     "обновится статус на SUCCESS." +
-                    "Для запроса нужно быть авторизованным админом/душой",
+                    "Для запроса нужно быть авторизованной душой",
             response = ResponseEntity.class)
     public ResponseEntity<PersonalProgramDto> updateExerciseProgress(@RequestHeader("soul-token") String token,
                                                                      @PathVariable String exerciseId,

@@ -17,7 +17,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -38,7 +37,7 @@ public class GodController {
 
     @GetMapping("/gods/profile")
     @ApiOperation(value = "Получить информацию о боге",
-            notes = "Для запроса нужно быть авторизованным админом/богом",
+            notes = "Для запроса нужно быть авторизованным богом",
             response = ResponseEntity.class)
     public ResponseEntity<GodDto> getGodById(@RequestHeader("soul-token") String token) {
         UserDto userDto;
@@ -56,7 +55,7 @@ public class GodController {
 
     @GetMapping("/gods/open-requests")
     @ApiOperation(value = "Получить список открытых запросов на выход из астрала",
-            notes = "Для запроса нужно быть авторизованным админом/богом",
+            notes = "Для запроса нужно быть авторизованным богом",
             response = ResponseEntity.class)
     public ResponseEntity<List<HelpRequestDto>> getOpenRequests(@RequestHeader("soul-token") String token) {
         UserDto userDto;
@@ -115,7 +114,7 @@ public class GodController {
 
     @GetMapping("/gods/my-requests")
     @ApiOperation(value = "Получить список запросов на выход из астрала, которые выполнил/выполняет бог",
-            notes = "Для запроса нужно быть авторизованным админом/богом",
+            notes = "Для запроса нужно быть авторизованным богом",
             response = ResponseEntity.class)
     public ResponseEntity<List<HelpRequestDto>> getGodRequests(@RequestHeader("soul-token") String token) {
         UserDto userDto;
