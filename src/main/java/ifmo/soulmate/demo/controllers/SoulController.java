@@ -64,7 +64,7 @@ public class SoulController {
         } catch (MainApiException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }
-        return ResponseEntity.ok(soulService.getSoulLives(UUID.fromString(userDto.getId())));
+        return ResponseEntity.ok(soulService.getSoulLives(UUID.fromString(userDto.getRoleId())));
     }
 
     @GetMapping("/souls/life-tickets")
