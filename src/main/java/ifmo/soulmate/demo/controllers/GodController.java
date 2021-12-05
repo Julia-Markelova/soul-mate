@@ -112,6 +112,28 @@ public class GodController {
         return ResponseEntity.ok(helpRequestDto);
     }
 
+    @PutMapping("/gods/reject-request/{requestId}")
+    @ApiOperation(value = "Отклонить заявку о помощи",
+            notes = "Для запроса нужно быть авторизованным богом",
+            response = ResponseEntity.class)
+    public ResponseEntity<HelpRequestDto> rejectRequest(@RequestHeader("soul-token") String token, @PathVariable String requestId) {
+        UserDto userDto;
+        try {
+            userDto = loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.GOD));
+        } catch (MainApiException ex) {
+            return new ResponseEntity(ex.getMessage(), ex.getStatus());
+        }
+        try {
+            godService.rejectRequest(UUID.fromString(userDto.getRoleId()), UUID.fromString(requestId));
+        } catch (NonExistingEntityException e) {
+            return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (IllegalArgumentException ex) {
+            return new ResponseEntity(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+        return ResponseEntity.ok().build();
+    }
+
+
     @GetMapping("/gods/my-requests")
     @ApiOperation(value = "Получить список запросов на выход из астрала, которые выполнил/выполняет бог",
             notes = "Для запроса нужно быть авторизованным богом",

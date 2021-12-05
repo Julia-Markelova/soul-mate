@@ -93,6 +93,28 @@ public class MentorController {
         return ResponseEntity.ok(helpRequestDto);
     }
 
+
+    @PutMapping("/mentors/reject-request/{requestId}")
+    @ApiOperation(value = "Отклонить заявку о помощи",
+            notes = "Для запроса нужно быть авторизованным ментором",
+            response = ResponseEntity.class)
+    public ResponseEntity<HelpRequestDto> rejectRequest(@RequestHeader("soul-token") String token, @PathVariable String requestId) {
+        UserDto userDto;
+        try {
+            userDto = loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.MENTOR));
+        } catch (MainApiException ex) {
+            return new ResponseEntity(ex.getMessage(), ex.getStatus());
+        }
+        try {
+            mentorService.rejectRequest(UUID.fromString(userDto.getRoleId()), UUID.fromString(requestId));
+        } catch (NonExistingEntityException e) {
+            return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (IllegalArgumentException ex) {
+            return new ResponseEntity(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/mentors/my-requests")
     @ApiOperation(value = "Получить список запросов на поиск искры жизни, которые выполнил/выполняет ментор",
             notes = "Для запроса нужно быть авторизованным ментором",

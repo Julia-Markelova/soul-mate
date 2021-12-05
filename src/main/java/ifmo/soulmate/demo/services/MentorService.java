@@ -1,24 +1,22 @@
 package ifmo.soulmate.demo.services;
 
 
-import ifmo.soulmate.demo.entities.God;
 import ifmo.soulmate.demo.entities.HelpRequest;
+import ifmo.soulmate.demo.entities.RejectedRequest;
 import ifmo.soulmate.demo.entities.Soul;
 import ifmo.soulmate.demo.entities.enums.HelpRequestStatus;
 import ifmo.soulmate.demo.entities.enums.HelpRequestType;
 import ifmo.soulmate.demo.exceptions.NonExistingEntityException;
 import ifmo.soulmate.demo.models.HelpRequestDto;
 import ifmo.soulmate.demo.repositories.HelpRequestRepository;
+import ifmo.soulmate.demo.repositories.RejectedRequestRepository;
 import ifmo.soulmate.demo.repositories.SoulRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -26,7 +24,8 @@ import java.util.stream.Stream;
 public class MentorService {
     @Autowired
     private SoulRepository soulRepository;
-
+    @Autowired
+    private RejectedRequestRepository rejectedRequestRepository;
     @Autowired
     private HelpRequestRepository helpRequestRepository;
 
@@ -36,8 +35,11 @@ public class MentorService {
         if (checkIsMentor(soulId)) {
             List<HelpRequest> newRequests = helpRequestRepository.getByStatusAndType(HelpRequestStatus.NEW, HelpRequestType.MENTOR);
             List<HelpRequest> acceptedRequests = helpRequestRepository.getByAcceptedByAndStatus(soulId, HelpRequestStatus.ACCEPTED);
+            List<UUID> rejectedRequestsIds = rejectedRequestRepository.getRejectedRequestIdsByRejectedById(soulId);
+            Set<UUID> rejectedRequestsIdsSet = new HashSet<>(rejectedRequestsIds);
             List<HelpRequest> openRequests = Stream.concat(newRequests.stream(), acceptedRequests.stream())
                     .collect(Collectors.toList());
+            openRequests = openRequests.stream().filter(e -> !rejectedRequestsIdsSet.contains(e.getId())).collect(Collectors.toList());
             log.info("Get open requests by mentor {}", soulId);
             return mapResult(openRequests);
         }
@@ -67,6 +69,29 @@ public class MentorService {
         String msg = String.format("Expected soul with isMentor = true");
         log.warn(msg);
         throw new IllegalArgumentException(msg);
+    }
+
+    public void rejectRequest(UUID mentorId, UUID requestId) throws NonExistingEntityException {
+        Optional<HelpRequest> request = helpRequestRepository.findById(requestId);
+        if (!request.isPresent() || !checkIsMentor(mentorId)) {
+            String msg = (String.format("Soul is not mentor: %s or no request found with id %s",
+                    mentorId.toString(), requestId.toString()));
+            log.warn(msg);
+            throw new NonExistingEntityException(msg);
+        }
+        if (request.get().getStatus() != HelpRequestStatus.NEW) {
+            String msg = (String.format("You can reject only opened requests. This request is %s", request.get().getStatus(),
+                     requestId.toString()));
+            log.warn(msg);
+            throw new IllegalArgumentException(msg);
+        }
+        RejectedRequest rejectedRequest = new RejectedRequest(
+                UUID.randomUUID(),
+                mentorId,
+                requestId
+        ) ;
+        rejectedRequestRepository.saveAndFlush(rejectedRequest);
+        log.info("Mentor {} rejected request {}", mentorId.toString(), requestId.toString());
     }
 
     public HelpRequestDto updateStatusForRequest(UUID soulId, UUID requestId, HelpRequestStatus status) throws NonExistingEntityException {

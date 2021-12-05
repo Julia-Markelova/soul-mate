@@ -3,6 +3,7 @@ package ifmo.soulmate.demo.services;
 
 import ifmo.soulmate.demo.entities.God;
 import ifmo.soulmate.demo.entities.HelpRequest;
+import ifmo.soulmate.demo.entities.RejectedRequest;
 import ifmo.soulmate.demo.entities.enums.HelpRequestStatus;
 import ifmo.soulmate.demo.entities.enums.HelpRequestType;
 import ifmo.soulmate.demo.exceptions.NonExistingEntityException;
@@ -10,15 +11,13 @@ import ifmo.soulmate.demo.models.GodDto;
 import ifmo.soulmate.demo.models.HelpRequestDto;
 import ifmo.soulmate.demo.repositories.GodRepository;
 import ifmo.soulmate.demo.repositories.HelpRequestRepository;
+import ifmo.soulmate.demo.repositories.RejectedRequestRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -29,6 +28,8 @@ public class GodService {
 
     @Autowired
     private HelpRequestRepository helpRequestRepository;
+    @Autowired
+    private RejectedRequestRepository rejectedRequestRepository;
 
     private static final Logger log = LogManager.getLogger(GodService.class);
 
@@ -59,8 +60,11 @@ public class GodService {
     public List<HelpRequestDto> getOpenHelpRequests(UUID godId) {
         List<HelpRequest> newRequests = helpRequestRepository.getByStatusAndType(HelpRequestStatus.NEW, HelpRequestType.GOD);
         List<HelpRequest> acceptedRequests = helpRequestRepository.getByAcceptedByAndStatus(godId, HelpRequestStatus.ACCEPTED);
+        List<UUID> rejectedRequestsIds = rejectedRequestRepository.getRejectedRequestIdsByRejectedById(godId);
+        Set<UUID> rejectedRequestsIdsSet = new HashSet<>(rejectedRequestsIds);
         List<HelpRequest> openRequests = Stream.concat(newRequests.stream(), acceptedRequests.stream())
                 .collect(Collectors.toList());
+        openRequests = openRequests.stream().filter(e -> !rejectedRequestsIdsSet.contains(e.getId())).collect(Collectors.toList());
         log.info("Get open requests by god {}", godId);
         return mapResult(openRequests);
     }
@@ -98,6 +102,30 @@ public class GodService {
         } else {
             throw new IllegalArgumentException("Can not update such request with such status");
         }
+    }
+
+    public void rejectRequest(UUID godId, UUID requestId) throws NonExistingEntityException {
+        Optional<HelpRequest> request = helpRequestRepository.findById(requestId);
+        Optional<God> god = godRepository.findById(godId);
+        if (!request.isPresent() || !god.isPresent()) {
+            String msg = (String.format("No god found with id: %s or no request found with id %s",
+                    godId.toString(), requestId.toString()));
+            log.warn(msg);
+            throw new NonExistingEntityException(msg);
+        }
+        if (request.get().getStatus() != HelpRequestStatus.NEW) {
+            String msg = (String.format("You can reject only opened requests. This request is %s", request.get().getStatus(),
+                    requestId.toString()));
+            log.warn(msg);
+            throw new IllegalArgumentException(msg);
+        }
+        RejectedRequest rejectedRequest = new RejectedRequest(
+                UUID.randomUUID(),
+                godId,
+                requestId
+        ) ;
+        rejectedRequestRepository.saveAndFlush(rejectedRequest);
+        log.info("God {} rejected request {}", godId.toString(), requestId.toString());
     }
 
     private List<HelpRequestDto> mapResult(List<HelpRequest> requests) {
