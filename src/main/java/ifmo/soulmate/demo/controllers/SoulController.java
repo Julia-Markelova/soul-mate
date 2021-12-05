@@ -6,10 +6,7 @@ import ifmo.soulmate.demo.entities.enums.UserRole;
 import ifmo.soulmate.demo.exceptions.AuthException;
 import ifmo.soulmate.demo.exceptions.MainApiException;
 import ifmo.soulmate.demo.exceptions.NonExistingEntityException;
-import ifmo.soulmate.demo.models.HelpRequestDto;
-import ifmo.soulmate.demo.models.PersonalProgramDto;
-import ifmo.soulmate.demo.models.SoulDto;
-import ifmo.soulmate.demo.models.UserDto;
+import ifmo.soulmate.demo.models.*;
 import ifmo.soulmate.demo.services.*;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,9 +26,6 @@ public class SoulController {
 
     @Autowired
     LifeTicketService lifeTicketService;
-
-    @Autowired
-    NotificationService notificationService;
 
     @Autowired
     LoginService loginService;
@@ -57,6 +51,20 @@ public class SoulController {
         } catch (NonExistingEntityException e) {
             return new ResponseEntity(e.getMessage(), HttpStatus.NOT_FOUND);
         }
+    }
+
+    @GetMapping("/souls/lives")
+    @ApiOperation(value = "Получить информацию о жизнях, которые проживала/проживает душа",
+            notes = "Для запроса нужно быть авторизованной душой",
+            response = ResponseEntity.class)
+    public ResponseEntity<List<LifeDto>> getSoulLives(@RequestHeader("soul-token") String token) {
+        UserDto userDto;
+        try {
+            userDto = loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.SOUL));
+        } catch (MainApiException ex) {
+            return new ResponseEntity(ex.getMessage(), ex.getStatus());
+        }
+        return ResponseEntity.ok(soulService.getSoulLives(UUID.fromString(userDto.getId())));
     }
 
     @GetMapping("/souls/life-tickets")

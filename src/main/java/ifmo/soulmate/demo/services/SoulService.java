@@ -1,12 +1,15 @@
 package ifmo.soulmate.demo.services;
 
-import ifmo.soulmate.demo.controllers.LoginController;
-import ifmo.soulmate.demo.entities.*;
+import ifmo.soulmate.demo.entities.HelpRequest;
+import ifmo.soulmate.demo.entities.Life;
+import ifmo.soulmate.demo.entities.Message;
+import ifmo.soulmate.demo.entities.Soul;
 import ifmo.soulmate.demo.entities.enums.HelpRequestStatus;
 import ifmo.soulmate.demo.entities.enums.MessageStatus;
 import ifmo.soulmate.demo.entities.enums.SoulStatus;
 import ifmo.soulmate.demo.exceptions.NonExistingEntityException;
 import ifmo.soulmate.demo.models.HelpRequestDto;
+import ifmo.soulmate.demo.models.LifeDto;
 import ifmo.soulmate.demo.models.SoulDto;
 import ifmo.soulmate.demo.repositories.*;
 import org.apache.logging.log4j.LogManager;
@@ -29,6 +32,8 @@ public class SoulService {
     IMessageRepository iMessageRepository;
     @Autowired
     HelpRequestRepository helpRequestRepository;
+    @Autowired
+    ILifesRepository lifeRepository;
 
     private static final Logger log = LogManager.getLogger(SoulService.class);
 
@@ -196,5 +201,29 @@ public class SoulService {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
 
+    }
+
+    public List<LifeDto> getSoulLives(UUID soulId) {
+        List<Life> lives = iLifesRepository.getLifeBySoulId(soulId);
+        return lives
+                .stream()
+                .map(x -> {
+                    try {
+                        return new LifeDto(
+                                x.getId().toString(),
+                                x.getSoulId().toString(),
+                                x.getSoulName(),
+                                x.getSoulSurname(),
+                                x.getKarma(),
+                                x.getDateOfBirth(),
+                                x.getDateOfDeath()
+                        );
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 }
