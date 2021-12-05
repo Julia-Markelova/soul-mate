@@ -2,14 +2,24 @@ package ifmo.soulmate.demo.models;
 
 import ifmo.soulmate.demo.entities.enums.SoulStatus;
 
-public class SoulRelativeDto {
+public class SubscriptionDto {
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    String id;
     String relativeId;
     String soulId;
     SoulStatus soulStatus;
     boolean soulIsMentor;
     boolean isSubscribed;
 
-    public SoulRelativeDto(String relativeId, String soulId, SoulStatus soulStatus,  boolean soulIsMentor, boolean isSubscribed) {
+    public SubscriptionDto(String id, String relativeId, String soulId, SoulStatus soulStatus, boolean soulIsMentor, boolean isSubscribed) {
+        this.id = id;
         this.relativeId = relativeId;
         this.soulId = soulId;
         this.soulStatus = soulStatus;
@@ -17,7 +27,7 @@ public class SoulRelativeDto {
         this.isSubscribed = isSubscribed;
     }
 
-    public SoulRelativeDto() {
+    public SubscriptionDto() {
     }
 
     public String getRelativeId() {
