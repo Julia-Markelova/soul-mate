@@ -43,7 +43,7 @@ public class GodController {
     public ResponseEntity<GodDto> getGodById(@RequestHeader("soul-token") String token) {
         UserDto userDto;
         try {
-            userDto = loginService.authoriseAndCheckPermission(token, Arrays.asList(UserRole.ADMIN, UserRole.GOD));
+            userDto = loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.GOD));
         } catch (MainApiException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }
@@ -61,7 +61,7 @@ public class GodController {
     public ResponseEntity<List<HelpRequestDto>> getOpenRequests(@RequestHeader("soul-token") String token) {
         UserDto userDto;
         try {
-            userDto = loginService.authoriseAndCheckPermission(token, Arrays.asList(UserRole.ADMIN, UserRole.GOD));
+            userDto = loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.GOD));
         } catch (MainApiException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }
@@ -120,7 +120,7 @@ public class GodController {
     public ResponseEntity<List<HelpRequestDto>> getGodRequests(@RequestHeader("soul-token") String token) {
         UserDto userDto;
         try {
-            userDto = loginService.authoriseAndCheckPermission(token, Arrays.asList(UserRole.ADMIN, UserRole.GOD));
+            userDto = loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.GOD));
         } catch (MainApiException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }
