@@ -1,13 +1,7 @@
 package ifmo.soulmate.demo.services;
 
-import ifmo.soulmate.demo.entities.HelpRequest;
-import ifmo.soulmate.demo.entities.Life;
-import ifmo.soulmate.demo.entities.Message;
-import ifmo.soulmate.demo.entities.Soul;
-import ifmo.soulmate.demo.entities.enums.HelpRequestStatus;
-import ifmo.soulmate.demo.entities.enums.HelpRequestType;
-import ifmo.soulmate.demo.entities.enums.MessageStatus;
-import ifmo.soulmate.demo.entities.enums.SoulStatus;
+import ifmo.soulmate.demo.entities.*;
+import ifmo.soulmate.demo.entities.enums.*;
 import ifmo.soulmate.demo.exceptions.NonExistingEntityException;
 import ifmo.soulmate.demo.models.HelpRequestDto;
 import ifmo.soulmate.demo.models.LifeDto;
@@ -35,6 +29,8 @@ public class SoulService {
     HelpRequestRepository helpRequestRepository;
     @Autowired
     ILifesRepository lifeRepository;
+    @Autowired
+    UserRepository userRepository;
 
     private static final Logger log = LogManager.getLogger(SoulService.class);
 
@@ -142,12 +138,19 @@ public class SoulService {
                 unwrapped.setIsMentor(isMentor);
                 soulRepository.saveAndFlush(unwrapped);
                 notifyRelativesAboutSoulMentor(unwrapped);
+                UserRole role = (isMentor) ? UserRole.MENTOR : UserRole.SOUL;
+                Optional<User> user = userRepository.findById(unwrapped.getUserId());
+                if (user.isPresent()) {
+                    user.get().setRole(role);
+                }
             }
             return new SoulDto(unwrapped.getId().toString(), unwrapped.getStatus(), "", unwrapped.getIsMentor());
         }
+
         String msg = (String.format("No soul found with id: %s", soulId.toString()));
         log.warn(msg);
         throw new NonExistingEntityException(msg);
+
     }
 
     public HelpRequestDto createNewHelpRequestForGod(UUID soulId) throws NonExistingEntityException {
