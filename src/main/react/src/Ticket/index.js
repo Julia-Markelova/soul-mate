@@ -3,10 +3,12 @@ import { useEffect, useState } from "react";
 import { CircularProgress } from "@material-ui/core";
 import TicketContent from "./TicketContent";
 import { useDispatch, useSelector } from "react-redux";
-import { Button } from 'reactstrap';
+import { Button, Progress } from 'reactstrap';
 import { useHistory } from 'react-router';
-import { receiveHelpRequest, receiveHelpRequests, recieveIsMentor } from '../Store/user-types';
+import { receiveHelpRequests, recieveIsMentor } from '../Store/user-types';
 import { HelpRequestTable } from '../GodHelpRequests';
+import { DataGrid } from "@material-ui/data-grid";
+import { useMemo } from 'react';
 
 
 function Ticket() {
@@ -27,7 +29,8 @@ function Ticket() {
     const [progress, setProgress] = useState(0);
 
     useEffect(() => {
-        if (!token || ((role !== "SOUL" && (soulStatus !== "DEAD" || soulStatus !== "UNBORN")) && role !== "MENTOR")) {
+        const allowed = !!token && (role === "MENTOR" || (role === "SOUL" && (soulStatus === "UNBORN" || soulStatus === "DEAD")))
+        if (!allowed) {
             history.push('/')
         }
 
@@ -67,14 +70,28 @@ function Ticket() {
             if (!data) await loadSouls();
         }, 2000);
 
-        if (!isAutoTicketEnabled && !lifeSparkRequests) {
-            const load = async () => {
-                const response = await fetch(`http://localhost:8080/api/souls/my-requests/life-spark`, {
-                    headers: { 'soul-token': token }
-                });
-                response.json().then(x => dispatch(receiveHelpRequests(x)));
+        if (!isAutoTicketEnabled) {
+            if (!personalProgram) {
+                const load = async () => {
+                    const response = await fetch(`http://localhost:8080/api/souls/personal-program`, {
+                        headers: { 'soul-token': token }
+                    });
+                    if (response.ok) {
+                        response.json().then(x => setPersonalProgram(x));
+                    }
+                }
+                load();
             }
-            load();
+
+            if (!lifeSparkRequests) {
+                const load = async () => {
+                    const response = await fetch(`http://localhost:8080/api/souls/my-requests/life-spark`, {
+                        headers: { 'soul-token': token }
+                    });
+                    response.json().then(x => dispatch(receiveHelpRequests(x)));
+                }
+                load();
+            }
         }
         return () => {
             clearInterval(timer);
@@ -104,9 +121,24 @@ function Ticket() {
     }
 
     const handlePersonalProgram = async () => {
-
+        const response = await fetch(`http://localhost:8080/api/souls/personal-program`, {
+            method: 'POST',
+            headers: { 'soul-token': token }
+        });
+        if (response.ok) {
+            response.json().then(x => setPersonalProgram(x));
+        }
     }
-    console.log(lifeSparkRequests)
+
+    const handleExercise = async (exerciseId, progress) => {
+        const response = await fetch(`http://localhost:8080/api/souls/personal-program/update-exercise-progress/${exerciseId}?progress=${progress}`, {
+            method: 'PUT',
+            headers: { 'soul-token': token }
+        });
+        if (response.ok) {
+            response.json().then(x => setPersonalProgram(x));
+        }
+    }
     return (
         <>
             {
@@ -117,7 +149,7 @@ function Ticket() {
                         onRejectUrl="http://localhost:8080/api/mentors/reject-request/"
                     />
                     :
-                    <div className="Ticket">
+                    <div className="Ticket" style={{ display: !personalProgram ? 'flex' : 'block' }}>
                         {
                             soulStatus === "DEAD"
                                 ? <>
@@ -147,8 +179,11 @@ function Ticket() {
                                                 lifeSparkRequests?.length === 1 &&
                                                 <>
                                                     {`Существует запрос на поиск искры жизни с помощью наставника. Ожидайте отклик наставника.
-                                                    Текущий статус: ${lifeSparkRequests.find(x => x.status !== "FINISHED")?.status}` }
+                                                    Текущий статус: ${lifeSparkRequests.find(x => x.status !== "FINISHED")?.status}`}
                                                 </>
+                                            }
+                                            {
+                                                !!personalProgram && <div style={{ display: 'block' }}> <PersonalProgram personalProgram={personalProgram} handleClick={handleExercise} /></div>
                                             }
                                         </>
                                     )
@@ -161,3 +196,42 @@ function Ticket() {
 }
 
 export default Ticket;
+
+
+const PersonalProgram = (props) => {
+    const { personalProgram, handleClick } = props;
+
+    const columns = [
+        {
+            field: 'skill',
+            headerName: 'Навык',
+            width: 300
+        }, {
+            field: 'progress',
+            headerName: 'Прогресс',
+            width: 300,
+            renderCell: params => <Progress color="success" value={Math.min(100, params.row.progress)} style={{ width: "100%" }} />
+        },
+        {
+            field: 'id',
+            headerName: 'Действие',
+            width: 300,
+            renderCell: params => {
+                const onClick = async e => {
+                    e.stopPropagation();
+                    await handleClick(params.row.id, Math.min(100, params.row.progress + 10))
+                }
+
+                return params.row.progress < 100 ? <Button onClick={onClick}>Тренировать</Button> : "Завершено"
+            }
+        }
+    ]
+
+    const sorted = useMemo(() => {
+        return [...personalProgram.exercises].sort((a, b) => a.skill.localeCompare(b.skill))
+    }, [personalProgram])
+
+    return <div style={{ height: 'auto', minHeight: '600px', marginTop: '30px' }}>
+        <DataGrid rows={sorted} columns={columns} pageSize={10} autoHeight />
+    </div>
+}
