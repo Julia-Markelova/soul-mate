@@ -1,33 +1,34 @@
 import * as React from "react"
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
-import { receiveHelpRequest, receiveHelpRequests } from "../Store/user-types";
+import { receiveAutoMode, receiveHelpRequest, receiveHelpRequests } from "../Store/user-types";
 import { useHistory } from "react-router";
 import { Label } from "reactstrap";
 import { Switch } from "@material-ui/core";
 
 const AdminSettings = () => {
     const history = useHistory();
+    const dispatch = useDispatch();
 
     const token = useSelector(x => x.user.token);
     const role = useSelector(x => x.user.role);
 
-    const [modes, setModes] = React.useState([]);
-
+    const modes = useSelector(x => x.user.autoModes);
+    console.log(modes)
     useEffect(() => {
         if (role !== "ADMIN" || !token) {
             history.push('/');
         }
-        else {
-            const load = async () => {
-                const response = await fetch("http://localhost:8080/admin/getAllModes", {
-                    headers: { 'soul-token': token }
-                });
-                response.json().then(x => { setModes(x) });
-            }
+        // else {
+        //     const load = async () => {
+        //         const response = await fetch("http://localhost:8080/admin/getAllModes", {
+        //             headers: { 'soul-token': token }
+        //         });
+        //         response.json().then(x => { setModes(x) });
+        //     }
 
-            load();
-        }
+        //     load();
+        // }
     }, [role, token]);
 
     const handleMode = async (id, enabled) => {
@@ -37,12 +38,12 @@ const AdminSettings = () => {
         });
 
         if (response.ok) {
-            setModes(x => [...x.filter(y => y.id !== id), { ...x.find(y => y.id === id), isManualMode: enabled }])
+            dispatch(receiveAutoMode({ ...modes.find(y => y.id === id), isManualMode: enabled }))
         }
     }
 
     return <>{
-        [...modes.sort((a, b) => a.id.localeCompare(b.id))].map((x, i) => <div key={i}>
+        [...modes].sort((a, b) => a.id.localeCompare(b.id)).map((x, i) => <div key={i}>
             <Label>{
                 x.type === "LIFE_TICKET_MODE" ? "Авто-выдача билетов в жизнь" : "Автоматический поиск искры жизни"
             }</Label>

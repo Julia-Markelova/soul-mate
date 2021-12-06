@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -48,7 +49,7 @@ public class AdminController {
             response = ResponseEntity.class)
     public ResponseEntity<List<SystemModeDto>> getAllModes(@RequestHeader("soul-token") String token) {
         try {
-            loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.ADMIN));
+            loginService.authoriseAndCheckPermission(token, Arrays.asList(UserRole.ADMIN, UserRole.SOUL));
         } catch (MainApiException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
         }

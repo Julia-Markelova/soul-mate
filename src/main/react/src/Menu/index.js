@@ -4,7 +4,7 @@ import { Button, Input } from "reactstrap"
 import * as React from "react";
 import { useState } from "react";
 import { useDispatch, useSelector } from 'react-redux';
-import { receiveRole, receiveToken, receiveUserId, receiveSoulStatus } from '../Store/user-types';
+import { receiveRole, receiveToken, receiveUserId, receiveSoulStatus, recieveIsMentor, receiveAutoModes, clearState } from '../Store/user-types';
 
 function Menu() {
     const dispatch = useDispatch();
@@ -27,14 +27,29 @@ function Menu() {
     }
 
     React.useEffect(() => {
-        if (role === "SOUL" && !!token) {
+        if (!!token) {
             const load = async () => {
+                if (role === "SOUL") {
+                    const response = await fetch(`http://localhost:8080/api/souls/profile`, {
+                        headers: { 'soul-token': token }
+                    });
+                    if (response.ok) {
+                        response.json().then(x => {
+                            dispatch(receiveSoulStatus(x.status));
+                            dispatch(recieveIsMentor(x.mentor));
+                        });
+                    }
+                }
 
-                const response = await fetch(`http://localhost:8080/api/souls/profile`, {
-                    headers: { 'soul-token': token }
-                });
-                if (response.ok) {
-                    response.json().then(x => dispatch(receiveSoulStatus(x.status)));
+                if (role === "ADMIN" || role === "SOUL") {
+                    const response = await fetch(`http://localhost:8080/admin/getAllModes`, {
+                        headers: { 'soul-token': token }
+                    });
+                    if (response.ok) {
+                        response.json().then(x => {
+                            dispatch(receiveAutoModes(x));
+                        });
+                    }
                 }
             }
             load();
@@ -43,8 +58,7 @@ function Menu() {
 
     const handleLogout = () => {
         localStorage.removeItem('token')
-        dispatch(receiveToken(''));
-        dispatch(receiveRole(''));
+        dispatch(clearState(undefined));
     }
 
     return (
@@ -69,7 +83,7 @@ function Menu() {
                     {
                         role === "MENTOR" && <>
                             <h3>
-                                <Link to="/parents">Тренировки душ</Link>
+                                <Link to="/ticket">Тренировки душ</Link>
                             </h3>
                         </>
                     }
