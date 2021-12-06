@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import RequestHelp from './DeadSouls';
 import GodHelpRequests from './GodHelpRequests';
 import { useDispatch } from 'react-redux';
-import { receiveRole, receiveToken, receiveUserId } from './Store/user-types';
+import { receiveRole, receiveToken, receiveUserId, receiveRoleId } from './Store/user-types';
 
 function App() {
     const dispatch = useDispatch();
@@ -27,6 +27,7 @@ function App() {
                     dispatch(receiveToken(token))
                     !!x.role && dispatch(receiveRole(x.role))
                     !!x.id && dispatch(receiveUserId(x.id));
+                    !!x.roleId && dispatch(receiveRoleId(x.roleId));
                 })
             }
             loadUser();

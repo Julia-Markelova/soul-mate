@@ -2,9 +2,9 @@ import './Menu.css';
 import { Link } from "react-router-dom";
 import { Button, Input } from "reactstrap"
 import * as React from "react";
-import { useState  } from "react";
+import { useState } from "react";
 import { useDispatch, useSelector } from 'react-redux';
-import { receiveRole, receiveToken, receiveUserId } from '../Store/user-types';
+import { receiveRole, receiveToken, receiveUserId, receiveSoulStatus } from '../Store/user-types';
 
 function Menu() {
     const dispatch = useDispatch();
@@ -13,16 +13,33 @@ function Menu() {
     const [password, setPassword] = useState("");
 
     const role = useSelector(s => s.user.role);
+    const soulStatus = useSelector(s => s.user.soulStatus);
+    const token = useSelector(s => s.user.token);
 
     const handleSubmit = async () => {
         const response = await fetch(`http://localhost:8080/login?login=${name}&password=${password}`, { method: "POST" });
         response.json().then(x => {
             localStorage.setItem('token', x.token)
-            dispatch(receiveToken( x.token));
+            dispatch(receiveToken(x.token));
             dispatch(receiveRole(x.role));
             dispatch(receiveUserId(x.id));
         })
     }
+
+    React.useEffect(() => {
+        if (role === "SOUL" && !!token) {
+            const load = async() => {
+
+                const response = await fetch(`http://localhost:8080/api/souls/profile`, {
+                    headers: { 'soul-token': token }
+                });
+                if (response.ok){
+                    response.json().then(x => dispatch(receiveSoulStatus(x.status)));
+                }
+            }
+            load();
+        }
+    }, [role, token]);
 
     const handleLogout = () => {
         localStorage.removeItem('token')
@@ -38,25 +55,36 @@ function Menu() {
                     {role === "ADMIN" && <h3>
                         <Link to="/souls">Список душ</Link>
                     </h3>}
-                    <h3>
-                        <Link to="/parents">Для родственников</Link>
-                    </h3>
+                    {
+                        role === "RELATIVE" && <>
+                            <h3>
+                                <Link to="/parents">Для родственников</Link>
+                            </h3>
+                        </>
+                    }
+                    {
+                        role === "MENTOR" && <>
+                            <h3>
+                                <Link to="/parents">Тренировки душ</Link>
+                            </h3>
+                        </>
+                    }
                     {role === "SOUL" &&
                         <>
                             <h3>
                                 <Link to="/ticket">Билет в жизнь</Link>
                             </h3>
-                            <h3>
+                            {soulStatus === "LOST" && <h3>
                                 <Link to="/soul-help">Спасение</Link>
-                            </h3>
+                            </h3>}
                         </>
                     }
                     {
                         role === "GOD" &&
                         <>
-                        <h3>
-                            <Link to="/god-help">Заявки на спасение</Link>
-                        </h3>
+                            <h3>
+                                <Link to="/god-help">Заявки на спасение</Link>
+                            </h3>
                         </>
                     }
                     <Button onClick={handleLogout} >Log out</Button>
