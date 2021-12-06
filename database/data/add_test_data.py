@@ -268,8 +268,14 @@ system_modes = [
         'id': str(uuid4()),
         'admin_id': str(users[-1]['id']),
         'is_manual_mode': False,
-        'type': type_,
-    } for type_ in ['LIFE_SPARK_MODE', 'LIFE_TICKET_MODE']
+        'type': 'LIFE_TICKET_MODE',
+    },
+    {
+        'id': str(uuid4()),
+        'admin_id': str(users[-1]['id']),
+        'is_manual_mode': True,
+        'type': 'LIFE_SPARK_MODE',
+    },
 ]
 
 

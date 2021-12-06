@@ -1,9 +1,10 @@
 package ifmo.soulmate.demo.services;
 
-import ifmo.soulmate.demo.controllers.LoginController;
-import ifmo.soulmate.demo.entities.*;
+import ifmo.soulmate.demo.entities.Exercise;
+import ifmo.soulmate.demo.entities.LifeSpark;
+import ifmo.soulmate.demo.entities.PersonalProgram;
+import ifmo.soulmate.demo.entities.ProgramExercise;
 import ifmo.soulmate.demo.entities.enums.PersonalProgramStatus;
-import ifmo.soulmate.demo.entities.enums.SystemModeType;
 import ifmo.soulmate.demo.exceptions.NonExistingEntityException;
 import ifmo.soulmate.demo.models.ExerciseDto;
 import ifmo.soulmate.demo.models.PersonalProgramDto;
@@ -160,12 +161,10 @@ public class PersonalProgramService {
             personalProgramRepository.saveAndFlush(unwrapped);
 
             if (status == PersonalProgramStatus.SUCCESS) {
-                // создаем новую искру жизни, если стоит автоматический режим
-                SystemMode mode = systemModeRepository.findSystemModeByType(SystemModeType.LIFE_SPARK_MODE);
-                if (!mode.getIsManualMode()) {
-                    LifeSpark lifeSpark = new LifeSpark(UUID.randomUUID(), new Date(), personalProgram.get().getSoulId(), personalProgram.get().getSoulId(), personalProgram.get().getId());
-                    lifeSparkRepository.saveAndFlush(lifeSpark);
-                }
+                // создаем новую искру жизни при успешном прохождении программы
+                LifeSpark lifeSpark = new LifeSpark(UUID.randomUUID(), new Date(), personalProgram.get().getSoulId(), personalProgram.get().getSoulId(), personalProgram.get().getId());
+                lifeSparkRepository.saveAndFlush(lifeSpark);
+
             }
         }
     }
