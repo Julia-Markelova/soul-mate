@@ -169,7 +169,7 @@ public class SoulController {
 
     @GetMapping("/souls/personal-program")
     @ApiOperation(value = "Получить информацию о персональной программе. " +
-            "Если программы еще нет, то она будет создана автоматически.",
+            "Если программы еще нет, то ошибка 404",
             notes = "Для запроса нужно быть авторизованной душой со статусом UNBORN. Количество упражнений в каждой программе фиксированно." +
                     "Задается в контроллеле души. По умолчанию 5.",
             response = ResponseEntity.class)
@@ -185,9 +185,44 @@ public class SoulController {
         if (soulDto.getStatus() != SoulStatus.UNBORN) {
             return new ResponseEntity(String.format("Expected soul with status UNBORN but got %s", soulDto.getStatus()), HttpStatus.BAD_REQUEST);
         }
-        Optional<PersonalProgramDto> personalProgram = personalProgramService.getPersonalProgramBySoulId(UUID.fromString(userDto.getRoleId()));
-        return personalProgram.map(ResponseEntity::ok).orElseGet(() ->
-                ResponseEntity.ok(personalProgramService.createPersonalProgram(UUID.fromString(userDto.getRoleId()), numberOfExercisesInPersonalProgram)));
+        try {
+            return ResponseEntity.ok(personalProgramService.getPersonalProgramBySoulId(UUID.fromString(userDto.getRoleId())));
+        } catch (NonExistingEntityException ex) {
+            return new ResponseEntity(ex.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PostMapping("/souls/personal-program")
+    @ApiOperation(value = "Создать персональную программу. " +
+            "Если программа уже есть, то ошибка 400",
+            notes = "Для запроса нужно быть авторизованной душой со статусом UNBORN. Количество упражнений в каждой программе фиксированно." +
+                    "Задается в контроллеле души. По умолчанию 5.",
+            response = ResponseEntity.class)
+    public ResponseEntity<PersonalProgramDto> createPersonalProgram(@RequestHeader("soul-token") String token,
+                                                                    @RequestParam(defaultValue = "5") Integer exercisesCount) {
+        UserDto userDto;
+        SoulDto soulDto;
+        try {
+            userDto = loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.SOUL));
+            soulDto = soulService.getSoulByUserId(UUID.fromString(userDto.getId()));
+        } catch (MainApiException ex) {
+            return new ResponseEntity(ex.getMessage(), ex.getStatus());
+        }
+        if (soulDto.getStatus() != SoulStatus.UNBORN) {
+            return new ResponseEntity(String.format("Expected soul with status UNBORN but got %s", soulDto.getStatus()), HttpStatus.BAD_REQUEST);
+        }
+        try {
+            personalProgramService.getPersonalProgramBySoulId(UUID.fromString(userDto.getRoleId()));
+            return new ResponseEntity(String.format("Soul %s already has personal program", soulDto.getId()), HttpStatus.BAD_REQUEST);
+
+        } catch (NonExistingEntityException ignored) {
+
+        }
+        try {
+            return ResponseEntity.ok(personalProgramService.createPersonalProgram(UUID.fromString(userDto.getRoleId()), exercisesCount));
+        } catch (IllegalArgumentException ex) {
+            return new ResponseEntity(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PutMapping("/souls/personal-program/update-exercise-progress/{exerciseId}")
@@ -201,26 +236,17 @@ public class SoulController {
     public ResponseEntity<PersonalProgramDto> updateExerciseProgress(@RequestHeader("soul-token") String token,
                                                                      @PathVariable String exerciseId,
                                                                      @RequestParam Integer progress) {
-        UserDto userDto;
         try {
-            userDto = loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.SOUL));
+            UserDto userDto = loginService.authoriseAndCheckPermission(token, Collections.singletonList(UserRole.SOUL));
+            PersonalProgramDto programDto = personalProgramService.getPersonalProgramBySoulId(UUID.fromString(userDto.getRoleId()));
+            personalProgramService.updateProgramExerciseProgress(UUID.fromString(programDto.getId()), UUID.fromString(exerciseId), progress);
+            return ResponseEntity.ok(personalProgramService.getPersonalProgramBySoulId(UUID.fromString(userDto.getRoleId())));
         } catch (NonExistingEntityException | AuthException ex) {
             return new ResponseEntity(ex.getMessage(), ex.getStatus());
+        } catch (IllegalArgumentException ex) {
+            return new ResponseEntity(ex.getMessage(), HttpStatus.BAD_REQUEST);
         }
-        Optional<PersonalProgramDto> programDto = personalProgramService.getPersonalProgramBySoulId(UUID.fromString(userDto.getRoleId()));
-        if (programDto.isPresent()) {
-            try {
-                personalProgramService.updateProgramExerciseProgress(UUID.fromString(programDto.get().getId()), UUID.fromString(exerciseId), progress);
-            } catch (NonExistingEntityException ex) {
-                return new ResponseEntity(ex.getMessage(), ex.getStatus());
-            } catch (IllegalArgumentException ex) {
-                return new ResponseEntity(ex.getMessage(), HttpStatus.BAD_REQUEST);
-            }
-        }
-        programDto = personalProgramService.getPersonalProgramBySoulId(UUID.fromString(userDto.getRoleId()));
-        return programDto.map(ResponseEntity::ok).orElseGet(() -> new ResponseEntity("No personal program found", HttpStatus.NOT_FOUND));
     }
-
 
     @PostMapping("/souls/create-help-request/life-spark")
     @ApiOperation(value = "Создает заявку на поиск искры жизни",

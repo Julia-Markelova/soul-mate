@@ -34,10 +34,12 @@ public class PersonalProgramService {
 
     private static final Logger log = LogManager.getLogger(PersonalProgramService.class);
 
-    public Optional<PersonalProgramDto> getPersonalProgramBySoulId(UUID soulId) {
+    public PersonalProgramDto getPersonalProgramBySoulId(UUID soulId) throws NonExistingEntityException {
         Optional<PersonalProgram> personalProgram = personalProgramRepository.findPersonalProgramBySoulId(soulId);
         if (!personalProgram.isPresent()) {
-            return Optional.empty();
+            String msg = String.format("No program found for soul %s", soulId.toString());
+            log.warn(msg);
+            throw new NonExistingEntityException(msg);
         }
         log.info("Get personal program for soul {}", soulId);
         PersonalProgram program = personalProgram.get();
@@ -61,12 +63,12 @@ public class PersonalProgramService {
                         })
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList());
-        return Optional.of(new PersonalProgramDto(
+        return new PersonalProgramDto(
                 program.getId().toString(),
                 program.getSoulId().toString(),
                 program.getStatus(),
                 exerciseDtos
-        ));
+        );
     }
 
     public void updateProgramExerciseProgress(UUID programId, UUID exerciseId, Integer progress) throws NonExistingEntityException {
