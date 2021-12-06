@@ -46,6 +46,17 @@ public class LifeTicketService {
                 .collect(Collectors.toList());
     }
 
+    public List<Soul> getSoulsWithoutSparks() {
+        List<LifeSpark> allSparks = lifeSparkRepository.findAll();
+        List<Soul> unbornSouls = soulRepository.getByStatus(SoulStatus.UNBORN);
+
+        return unbornSouls
+                .stream()
+                .filter((soul) -> allSparks
+                        .stream()
+                        .noneMatch(t -> t.getReceived_by().equals(soul.getId())))
+                .collect(Collectors.toList());
+    }
 
     public LifeTicket getNotUsedLifeTicket(UUID soulId) {
         List<LifeSpark> allSparks = lifeSparkRepository.findAll();
