@@ -10,6 +10,7 @@ import RequestHelp from './DeadSouls';
 import GodHelpRequests from './GodHelpRequests';
 import { useDispatch } from 'react-redux';
 import { receiveRole, receiveToken, receiveUserId, receiveRoleId } from './Store/user-types';
+import AdminSettings from './AdminSettings';
 
 function App() {
     const dispatch = useDispatch();
@@ -44,6 +45,7 @@ function App() {
                 <Route path='/ticket' component={Ticket} />
                 <Route path='/soul-help' component={RequestHelp} />
                 <Route path='/god-help' component={GodHelpRequests} />
+                <Route path='/admin-settings' component={AdminSettings} />
             </Switch>
         </BrowserRouter>
     );

@@ -1,10 +1,10 @@
 
 import { RepeatOneSharp, Report } from "@material-ui/icons";
 import * as React from "react"
-import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
 import { Button } from "reactstrap";
+import { useEffect } from "react";
 import { receiveHelpRequest, receiveHelpRequests } from "../Store/user-types";
 
 const RequestHelp = () => {
@@ -18,6 +18,7 @@ const RequestHelp = () => {
     const soulStatus = useSelector(x => x.user.soulStatus);
 
     const thisSoulRequests = useSelector(x => x.user.helpRequests);
+
     useEffect(() => {
         if (!token) return;
 

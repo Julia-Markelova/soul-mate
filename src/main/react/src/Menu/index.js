@@ -28,12 +28,12 @@ function Menu() {
 
     React.useEffect(() => {
         if (role === "SOUL" && !!token) {
-            const load = async() => {
+            const load = async () => {
 
                 const response = await fetch(`http://localhost:8080/api/souls/profile`, {
                     headers: { 'soul-token': token }
                 });
-                if (response.ok){
+                if (response.ok) {
                     response.json().then(x => dispatch(receiveSoulStatus(x.status)));
                 }
             }
@@ -52,9 +52,13 @@ function Menu() {
             {!!role
                 ? <>
 
-                    {role === "ADMIN" && <h3>
-                        <Link to="/souls">Список душ</Link>
-                    </h3>}
+                    {role === "ADMIN" &&
+                        <> <h3>
+                            <Link to="/souls">Список душ</Link>
+                        </h3><h3>
+                                <Link to="/admin-settings">Настройки</Link>
+                            </h3>
+                        </>}
                     {
                         role === "RELATIVE" && <>
                             <h3>
