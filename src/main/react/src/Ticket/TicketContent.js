@@ -1,14 +1,14 @@
 import './TicketContent.css';
 import Button from '@material-ui/core/Button';
-import {useEffect, useState} from "react";
+import {useCallback, useEffect, useState} from "react";
 import { useHistory } from "react-router";
 
 function TicketContent(props) {
     let history = useHistory();
     const { soulId } = props
-    const redirect = () => {
+    const redirect = useCallback(() => {
         history.push('/');
-    };
+    }, [history]);
 
     const [tick, setTick] = useState(10);
 
@@ -20,7 +20,7 @@ function TicketContent(props) {
         return () => {
             clearInterval(timer);
         };
-    }, []);
+    }, [redirect]);
 
     return (
         <div className="TicketContent">

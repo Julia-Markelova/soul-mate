@@ -1,5 +1,4 @@
 
-import { RepeatOneSharp, Report } from "@material-ui/icons";
 import * as React from "react"
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router";
@@ -14,7 +13,6 @@ const RequestHelp = () => {
 
     const token = useSelector(x => x.user.token);
     const role = useSelector(x => x.user.role);
-    const id = useSelector(x => x.user.roleId);
     const soulStatus = useSelector(x => x.user.soulStatus);
 
     const thisSoulRequests = useSelector(x => x.user.helpRequests);
@@ -37,7 +35,7 @@ const RequestHelp = () => {
         if (role !== "SOUL" || !token || soulStatus !== "LOST") {
             history.push('/');
         }
-    }, [role, token, soulStatus]);
+    }, [role, token, soulStatus, history]);
 
     const handleClick = async () => {
         const response = await fetch(`http://localhost:8080/api/souls/create-help-request/astral`, {

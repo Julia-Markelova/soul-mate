@@ -103,7 +103,7 @@ const GodHelpRequests = () => {
         if (role !== "GOD" || !token) {
             history.push('/');
         }
-    }, [role, token]);
+    }, [role, token, history]);
     
     useEffect(() => {
         if (!token) return;
@@ -115,7 +115,7 @@ const GodHelpRequests = () => {
             data.json().then(x => dispatch(receiveHelpRequests(x)));
         }
         load();
-    }, [token]);
+    }, [token, dispatch]);
 
     return <HelpRequestTable
         onAcceptUrl="http://localhost:8080/api/gods/accept-request/"

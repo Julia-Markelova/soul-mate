@@ -16,11 +16,10 @@ function Ticket() {
     const dispatch = useDispatch();
 
     const soulId = useSelector(s => s.user.roleId);
-    const isMentor = useSelector(s => s.user.isMentor);
     const soulStatus = useSelector(s => s.user.soulStatus);
     const token = useSelector(s => s.user.token);
     const role = useSelector(s => s.user.role);
-    const isAutoTicketEnabled = useSelector(s => s.user.autoModes.find(x => x.type === "LIFE_TICKET_MODE")?.isManualMode === false);
+    const isAutoSparkEnabled = useSelector(s => s.user.autoModes.find(x => x.type === "LIFE_SPARK_MODE")?.isManualMode === false);
 
     const [data, setData] = useState();
     const lifeSparkRequests = useSelector(x => x.user.helpRequests);
@@ -70,35 +69,33 @@ function Ticket() {
             if (!data) await loadSouls();
         }, 2000);
 
-        if (!isAutoTicketEnabled) {
-            if (!personalProgram) {
-                const load = async () => {
-                    const response = await fetch(`http://localhost:8080/api/souls/personal-program`, {
-                        headers: { 'soul-token': token }
-                    });
-                    if (response.ok) {
-                        response.json().then(x => setPersonalProgram(x));
-                    }
+        if (!personalProgram) {
+            const load = async () => {
+                const response = await fetch(`http://localhost:8080/api/souls/personal-program`, {
+                    headers: { 'soul-token': token }
+                });
+                if (response.ok) {
+                    response.json().then(x => setPersonalProgram(x));
                 }
-                load();
             }
+            load();
+        }
 
-            if (!lifeSparkRequests) {
-                const load = async () => {
-                    const response = await fetch(`http://localhost:8080/api/souls/my-requests/life-spark`, {
-                        headers: { 'soul-token': token }
-                    });
-                    response.json().then(x => dispatch(receiveHelpRequests(x)));
-                }
-                load();
+        if (!lifeSparkRequests) {
+            const load = async () => {
+                const response = await fetch(`http://localhost:8080/api/souls/my-requests/life-spark`, {
+                    headers: { 'soul-token': token }
+                });
+                response.json().then(x => dispatch(receiveHelpRequests(x)));
             }
+            load();
         }
         return () => {
             clearInterval(timer);
             clearInterval(timer2);
             isCancelled = true;
         };
-    }, [data, token]);
+    }, [data, token, dispatch, history, lifeSparkRequests, personalProgram, role, soulStatus]);
 
     const handleBecomeMentor = async () => {
         const response = await fetch(`http://localhost:8080/api/souls/update/mentor/true`, {
@@ -149,7 +146,7 @@ function Ticket() {
                         onRejectUrl="http://localhost:8080/api/mentors/reject-request/"
                     />
                     :
-                    <div className="Ticket" style={{ display: !personalProgram ? 'flex' : 'block' }}>
+                    <div className="Ticket" style={{ paddingTop: '15px' }}>
                         {
                             soulStatus === "DEAD"
                                 ? <>
@@ -157,36 +154,38 @@ function Ticket() {
                                     <Button onClick={handleBecomeMentor}>Стать наставником</Button>
                                 </>
                                 :
-                                isAutoTicketEnabled ?
-                                    !data && (
-                                        <div >
+                                <>
+                                    {!isAutoSparkEnabled && !lifeSparkRequests?.length && !personalProgram &&
+                                        <div style={{ width: 'fit-content', margin: 'auto' }}>
+                                            <Button onClick={handleMentorRequest}>Найти наставника</Button>
+                                            <Button onClick={handlePersonalProgram}>Использовать персональную программу</Button>
+                                        </div>
+                                    }
+                                    <div style={{ display: 'block', width: 'fit-content', margin: 'auto' }}>
+                                        {
+                                            lifeSparkRequests?.length === 1 &&
+                                            <>
+                                                {`Существует запрос на поиск искры жизни с помощью наставника. Ожидайте отклик наставника.
+                                                    Текущий статус: ${lifeSparkRequests.find(x => x.status !== "FINISHED")?.status}`}
+                                            </>
+                                        }
+                                        {
+                                            !!personalProgram && <PersonalProgram personalProgram={personalProgram} handleClick={handleExercise} />
+                                        }
+                                    </div>
+                                    {!data && <>
+                                        <br />
+                                        <br />
+                                        <div style={{ display: 'block', width: 'fit-content', margin: 'auto' }} >
+
                                             <div>
                                                 <h1>Поиск билета в жизнь</h1>
                                             </div>
                                             <CircularProgress className="Ticket-spinner" variant="determinate" value={progress} />
                                         </div>
 
-                                    )
-                                    : (
-                                        <>
-                                            {!lifeSparkRequests?.length && !personalProgram &&
-                                                <>
-                                                    <Button onClick={handleMentorRequest}>Найти наставника</Button>
-                                                    <Button onClick={handlePersonalProgram}>Использовать персональную программу</Button>
-                                                </>
-                                            }
-                                            {
-                                                lifeSparkRequests?.length === 1 &&
-                                                <>
-                                                    {`Существует запрос на поиск искры жизни с помощью наставника. Ожидайте отклик наставника.
-                                                    Текущий статус: ${lifeSparkRequests.find(x => x.status !== "FINISHED")?.status}`}
-                                                </>
-                                            }
-                                            {
-                                                !!personalProgram && <div style={{ display: 'block' }}> <PersonalProgram personalProgram={personalProgram} handleClick={handleExercise} /></div>
-                                            }
-                                        </>
-                                    )
+                                    </>}
+                                </>
                         }
                         {data && <TicketContent soulId={soulId} />}
                     </div>

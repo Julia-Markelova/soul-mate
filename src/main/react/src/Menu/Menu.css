@@ -14,3 +14,11 @@
     text-decoration: none;
     color: #7B9CEA;
 }
+
+.menu-link {
+    padding: 8px;
+}
+
+.menu-input {
+    max-width: 250px;
+}
