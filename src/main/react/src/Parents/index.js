@@ -3,14 +3,15 @@ import { useEffect, useState } from "react";
 import Button from "@material-ui/core/Button";
 import { useHistory } from "react-router";
 import { useSelector } from 'react-redux';
+import { Label } from "reactstrap";
 
 function Parents() {
     const history = useHistory();
 
     const [data, setData] = useState([]);
-    const [isSubscribed, setIsSubscribed] = useState(false);
     const token = useSelector(x => x.user.token);
     const role = useSelector(x => x.user.role);
+    const [subscriptions, setSubscriptions] = useState([]);
 
     useEffect(() => {
         if (role !== "RELATIVE" || !token) {
@@ -21,13 +22,12 @@ function Parents() {
     useEffect(() => {
         if (!token) return;
         let isCancelled = false;
-        console.log(1);
         const loadSouls = async () => {
             try {
                 const response = await fetch(`http://localhost:8080/api/relatives/get-subscriptions`, {
                     headers: { 'soul-token': token }
                 });
-                !isCancelled && response.json().then(x =>  console.log(x));
+                !isCancelled && response.json().then(x => setSubscriptions(x));
             }
             catch (error) {
                 !isCancelled && console.log(error.toString());
@@ -39,19 +39,18 @@ function Parents() {
         return () => {
             isCancelled = true;
         };
-    }, [isSubscribed, token]);
+    }, [token]);
 
     useEffect(() => {
         if (!token) return;
         let isCancelled = false;
-        console.log(2);
         const loadSouls = async () => {
             try {
                 const response = await fetch(`http://localhost:8080/api/relatives/get-new-messages`, {
                     headers: { 'soul-token': token }
                 });
-                !isCancelled && response.json().then(x => { console.log(x)
-                    //!!x?.length && setData(prev => [...prev, ...x])
+                !isCancelled && response.json().then(x => {
+                    !!x?.length && setData(prev => [...prev, ...x])
                 });
             }
             catch (error) {
@@ -60,37 +59,46 @@ function Parents() {
         };
 
         const timer2 = setInterval(async () => {
-            if (isSubscribed) await loadSouls();
+            if (subscriptions.some(x => x.subscribed)) await loadSouls();
         }, 2000);
 
         return () => {
             clearInterval(timer2);
             isCancelled = true;
         };
-    }, [data, isSubscribed, token]);
+    }, [data, subscriptions, token]);
 
-    const handleSubscribe = async (value) => {
-        // await fetch(`http://localhost:8080/api/relatives/${userId}/subscriptions?enable=${!isSubscribed}`);
-        setIsSubscribed(value)
+    const handleSubscribe = async (id, value) => {
+        const response = await fetch(`http://localhost:8080/api/relatives/toggle-subscriptions?subscriptionId=${id}&enable=${value}`, {
+            headers: { 'soul-token': token }
+        });
+        if (response.ok) {
+            response.json().then(x => setSubscriptions(y => [...y.filter(z => z.id !== x.id), x]))
+        }
     }
 
     return (
         <>
-            <Button onClick={x => handleSubscribe(x.target.checked)}
-                style={{
-                    margin: 'auto',
-                    display: 'block',
-                    backgroundColor: '#7b9cea',
-                    color: 'white',
-                    width: '200px',
-                    height: '50px',
-                    fontSize: '20px',
-                    marginTop: '33px'
-                }}>
-                {isSubscribed ? "Отписаться" : "Подписаться"}
-            </Button>
+            {
+                [...subscriptions].sort((a, b) => a.id.localeCompare(b.id)).map((x, i) => <div key={i} style={{ width: 'fit-content', margin: '10px auto' }}>
+                    <Label>ID души: {x.soulId}</Label>
+                    <Button onClick={e => handleSubscribe(x.id, !x.subscribed)}
+                        style={{
+                            margin: 'auto 10px',
+                            // display: 'block',
+                            backgroundColor: '#7b9cea',
+                            color: 'white',
+                            width: '200px',
+                            height: '50px',
+                            fontSize: '20px',
+                            // marginTop: '33px'
+                        }}>
+                        {x.subscribed ? "Отписаться" : "Подписаться"}
+                    </Button>
+                </div>)
+            }
 
-            <div className="Ticket">
+            <div className="Ticket" style={{ textAlign: 'center' }}>
                 {
                     !data.length && (
                         <div >
