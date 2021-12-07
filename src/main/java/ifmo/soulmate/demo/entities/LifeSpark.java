@@ -22,7 +22,7 @@ public class LifeSpark {
     private UUID issued_by;
 
     @Column(name = "personal_program_id")
-    private UUID personal_program_id;
+    private UUID personalProgramId;
 
     public UUID getId() {
         return id;
@@ -56,22 +56,22 @@ public class LifeSpark {
         this.issued_by = issued_by;
     }
 
-    public UUID getPersonal_program_id() {
-        return personal_program_id;
+    public UUID getPersonalProgramId() {
+        return personalProgramId;
     }
 
-    public void setPersonal_program_id(UUID personal_program_id) {
-        this.personal_program_id = personal_program_id;
+    public void setPersonalProgramId(UUID personal_program_id) {
+        this.personalProgramId = personal_program_id;
     }
 
     public LifeSpark() {
     }
 
-    public LifeSpark(UUID id, Date receiveDate, UUID received_by, UUID issued_by, UUID personal_program_id) {
+    public LifeSpark(UUID id, Date receiveDate, UUID received_by, UUID issued_by, UUID personalProgramId) {
         this.id = id;
         this.receiveDate = receiveDate;
         this.received_by = received_by;
         this.issued_by = issued_by;
-        this.personal_program_id = personal_program_id;
+        this.personalProgramId = personalProgramId;
     }
 }

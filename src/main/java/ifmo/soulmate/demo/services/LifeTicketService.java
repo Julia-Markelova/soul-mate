@@ -1,14 +1,9 @@
 package ifmo.soulmate.demo.services;
 
-import ifmo.soulmate.demo.entities.Life;
-import ifmo.soulmate.demo.entities.LifeSpark;
-import ifmo.soulmate.demo.entities.LifeTicket;
-import ifmo.soulmate.demo.entities.Soul;
+import ifmo.soulmate.demo.entities.*;
+import ifmo.soulmate.demo.entities.enums.PersonalProgramStatus;
 import ifmo.soulmate.demo.entities.enums.SoulStatus;
-import ifmo.soulmate.demo.repositories.ILIfeTicketRepository;
-import ifmo.soulmate.demo.repositories.ILifeSparkRepository;
-import ifmo.soulmate.demo.repositories.ILifesRepository;
-import ifmo.soulmate.demo.repositories.SoulRepository;
+import ifmo.soulmate.demo.repositories.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +27,8 @@ public class LifeTicketService {
     SoulRepository soulRepository;
     @Autowired
     ILifesRepository lifesRepository;
+    @Autowired
+    PersonalProgramRepository personalProgramRepository;
     private static final Logger log = LogManager.getLogger(LifeTicketService.class);
 
     public List<LifeSpark> getSparksWithoutTickets() {
@@ -55,6 +52,18 @@ public class LifeTicketService {
                 .filter((soul) -> allSparks
                         .stream()
                         .noneMatch(t -> t.getReceived_by().equals(soul.getId())))
+                .collect(Collectors.toList());
+    }
+
+    public List<PersonalProgram> getFinishedProgramsWithoutSparks() {
+        List<LifeSpark> allSparks = lifeSparkRepository.getByPersonalProgramIdNotNull();
+        List<PersonalProgram> finishedPrograms = personalProgramRepository.getByStatus(PersonalProgramStatus.SUCCESS);
+
+        return finishedPrograms
+                .stream()
+                .filter((program) -> allSparks
+                        .stream()
+                        .noneMatch(t -> t.getPersonalProgramId().equals(program.getId())))
                 .collect(Collectors.toList());
     }
 

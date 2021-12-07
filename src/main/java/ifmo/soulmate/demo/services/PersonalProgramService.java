@@ -159,13 +159,6 @@ public class PersonalProgramService {
         if (unwrapped.getStatus() != status) {
             unwrapped.setStatus(status);
             personalProgramRepository.saveAndFlush(unwrapped);
-
-            if (status == PersonalProgramStatus.SUCCESS) {
-                // создаем новую искру жизни при успешном прохождении программы
-                LifeSpark lifeSpark = new LifeSpark(UUID.randomUUID(), new Date(), personalProgram.get().getSoulId(), personalProgram.get().getSoulId(), personalProgram.get().getId());
-                lifeSparkRepository.saveAndFlush(lifeSpark);
-
-            }
         }
     }
 
