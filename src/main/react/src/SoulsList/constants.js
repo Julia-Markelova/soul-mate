@@ -11,8 +11,8 @@ export const soulColumns = [
         width: 300
     },
     {
-        field: 'type',
-        headerName: 'Тип',
+        field: 'status',
+        headerName: 'Статус',
         width: 400,
         sortable: true,
     },

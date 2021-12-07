@@ -5,7 +5,7 @@ import Home from './Home';
 import Ticket from "./Ticket";
 import Parents from "./Parents";
 import Menu from "./Menu";
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import RequestHelp from './DeadSouls';
 import GodHelpRequests from './GodHelpRequests';
 import { useDispatch } from 'react-redux';
@@ -15,7 +15,7 @@ import AdminSettings from './AdminSettings';
 function App() {
     const dispatch = useDispatch();
 
-    const [token, setToken] = useState(localStorage.getItem('token'));
+    const token = localStorage.getItem('token');
 
     useEffect(() => {
         if (token) {
@@ -46,6 +46,7 @@ function App() {
                 <Route path='/soul-help' component={RequestHelp} />
                 <Route path='/god-help' component={GodHelpRequests} />
                 <Route path='/admin-settings' component={AdminSettings} />
+                <Route path='/parents' component={Parents} />
             </Switch>
         </BrowserRouter>
     );

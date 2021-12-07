@@ -26,6 +26,9 @@ function Menu() {
         })
     }
 
+    const canShowSaveAstral = React.useMemo(() => role === "SOUL" && soulStatus === "LOST", [role, soulStatus]);
+    const canShowLifeTicket = React.useMemo(() => role === "MENTOR" || (role === "SOUL" && (soulStatus === "UNBORN" || soulStatus === "DEAD")), [role, soulStatus]);
+
     React.useEffect(() => {
         if (!!token) {
             const load = async () => {
@@ -54,7 +57,7 @@ function Menu() {
             }
             load();
         }
-    }, [role, token]);
+    }, [role, token, dispatch]);
 
     const handleLogout = () => {
         localStorage.removeItem('token')
@@ -89,10 +92,10 @@ function Menu() {
                     }
                     {role === "SOUL" &&
                         <>
-                            <h3>
+                            {canShowLifeTicket && <h3>
                                 <Link to="/ticket">Билет в жизнь</Link>
-                            </h3>
-                            {soulStatus === "LOST" && <h3>
+                            </h3>}
+                            {canShowSaveAstral && <h3>
                                 <Link to="/soul-help">Спасение</Link>
                             </h3>}
                         </>
@@ -108,11 +111,9 @@ function Menu() {
                     <Button onClick={handleLogout} >Log out</Button>
                 </>
                 : <>
-                    <h3>
-                        <Link to="/">На главную</Link>
-                    </h3>
-                    <Input type="text" value={name} onChange={e => setName(e.target.value)} />
-                    <Input type="text" value={password} onChange={e => setPassword(e.target.value)} />
+                    <Link className="menu-link" to="/">На главную</Link>
+                    <Input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Логин" className="menu-input" />
+                    <Input type="text" value={password} onChange={e => setPassword(e.target.value)} placeholder="Пароль" className="menu-input"/>
                     <Button onClick={handleSubmit}>Log in</Button>
                 </>
             }

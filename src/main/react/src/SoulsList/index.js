@@ -5,10 +5,9 @@ import {useEffect, useMemo, useState} from "react";
 import {Input} from "@material-ui/core";
 import { useHistory } from 'react-router';
 import * as React from "react";
-import { useDispatch, useSelector } from "react-redux";
+import {  useSelector } from "react-redux";
 
 function SoulsList() {
-    const dispatch = useDispatch();
 
     const history = useHistory();
 
@@ -19,7 +18,7 @@ function SoulsList() {
         if (role !== "ADMIN" || !token) {
             history.push('/')
         }
-    }, [role, history]);
+    }, [role, history, token]);
 
     const [souls, setSouls] = useState([]);
     const [filterValue, setFilterValue] = useState("");
