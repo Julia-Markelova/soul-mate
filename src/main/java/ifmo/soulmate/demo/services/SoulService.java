@@ -171,8 +171,8 @@ public class SoulService {
                     log.warn(msg);
                     throw new IllegalArgumentException(msg);
                 }
-                HelpRequest helpRequest = new HelpRequest(UUID.randomUUID(), HelpRequestStatus.NEW, soulId, HelpRequestType.GOD);
-                helpRequestRepository.saveAndFlush(helpRequest);
+                HelpRequest helpRequest = new HelpRequest( UUID.randomUUID(), HelpRequestStatus.NEW, soulId, HelpRequestType.GOD);
+                helpRequest = helpRequestRepository.saveAndFlush(helpRequest);
                 return new HelpRequestDto(helpRequest.getId().toString(), helpRequest.getCreatedBy().toString(), helpRequest.getStatus());
             } else {
                 String msg = (String.format("Soul %s is not LOST", soulId.toString()));

@@ -33,7 +33,8 @@ function App() {
             }
             loadUser();
         }
-    }, [token, dispatch])
+    }, [token, dispatch]);
+
 
     return (
         <BrowserRouter>
