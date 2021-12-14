@@ -5,6 +5,7 @@ import { useHistory } from "react-router";
 import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
 import { useEffect, useState } from "react";
 import { receiveHelpRequest, receiveHelpRequests, receiveSoulStatus } from "../Store/user-types";
+import { getRequestDescription } from "../GodHelpRequests";
 
 const RequestHelp = () => {
     const dispatch = useDispatch();
@@ -93,13 +94,13 @@ const RequestHelp = () => {
         </Button>
             :
             <>
-                <div style={{ width: 'fit-content' }}>{`Заявка создана. Текущий статус: ${blockingRequest.status}`}</div>
+                <div style={{ width: 'fit-content' }}>{`Заявка создана. Текущий статус: ${getRequestDescription(blockingRequest.status)}`}</div>
                 <Modal isOpen={openModal}>
                     <ModalHeader>
                         Новое уведомление
                     </ModalHeader>
                     <ModalBody>
-                        <div style={{ width: 'fit-content' }}>{`Заявка создана. Текущий статус: ${blockingRequest.status}`}</div>
+                        <div style={{ width: 'fit-content' }}>{`Заявка создана. Текущий статус: ${getRequestDescription(blockingRequest.status)}`}</div>
                     </ModalBody>
                     <ModalFooter>
                         <Button onClick={e => setOpenModal(false)}>

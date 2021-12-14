@@ -167,7 +167,7 @@ function Ticket() {
                         {
                             soulStatus === "DEAD"
                                 ? <div style={{ width: 'fit-content', margin: 'auto' }}>
-                                    {"Вы мертвы... Все, что вам теперь остается, это"}
+                                    {"Вы мертвы... Все, что вам теперь остается, это "}
                                     <Button onClick={handleBecomeMentor}>Стать наставником</Button>
                                 </div>
                                 :
